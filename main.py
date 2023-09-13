@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import io
 import base64
 import datetime
 
@@ -21,37 +20,35 @@ uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 if uploaded_file:
     df = pd.read_excel(uploaded_file, skiprows=1)
 
-    # Initial Cleansing Steps
+    # Initial data cleansing
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
     df = df[df['Value'] != '06-LE/FC-N']
-    
+
     # Additional Cleansing Steps
-    df.loc[df['Des'].str.contains('Purch Req', na=False), 'Supply Source'] = 'Purch Req'
-    df.loc[df['Des'].str.contains('Sched Agrmt', na=False), 'Supply Source'] = 'Sched Agrmt'
-    df.loc[df['Des'].str.contains('Firm Planned Order', na=False), 'Supply Source'] = 'PlannedOrder'
+    df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
+    df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
+    df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
     df = df[df['Supply Source'] != 'SubstituteSupply']
-    df.drop(columns=['Des', 'Value'], errors='ignore', inplace=True)
+    df.drop(columns=['Des', 'Value', 'Action'], errors='ignore', inplace=True)
 
-    # New Cleansing Steps
-    # Convert 'Date Release' to datetime format and 'GRPT' to numeric if they are not
-    df['Date Release'] = pd.to_datetime(df['Date Release'])
-    df['GRPT'] = pd.to_numeric(df['GRPT'], errors='coerce')
+    # Date manipulation
+    try:
+        df['Date Release'] = pd.to_datetime(df['Date Release'])
+        df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
+    except Exception as e:
+        problematic_values = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').isna(), 'Date Release']
+        st.write("Found problematic values in 'Date Release':", problematic_values)
+        st.write("Error:", str(e))
+        raise e
+
+    # Remove 'GRPT' and 'Date Release'
+    df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     
-    # Perform the date subtraction
-    df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
-
-    # Drop the original columns
-    df.drop(columns=['GRPT', 'Date Release', 'Action'], errors='ignore', inplace=True)
-
-    # Rename the new column
+    # Rename 'Date Release1' to 'Date Release'
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
     
-    # Commenting out the DataFrame display to improve performance
-    # st.write('Cleansed Data')
-    # st.write(df)
-    
-    # Download button for cleansed data
+    # Download button
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
