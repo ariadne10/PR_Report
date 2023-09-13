@@ -15,10 +15,10 @@ if uploaded_file:
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
     
     # Delete all rows where values in column E contain "PAAS"
-    df = df[df['E'] != 'PAAS']
+    df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     
     # Remove column E
-    df.drop(columns=['E'], errors='ignore', inplace=True)
+    df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
     
     # Delete all rows where value in column H contain "06-LE/FC-N"
     df = df[df['H'] != '06-LE/FC-N']
