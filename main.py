@@ -26,9 +26,6 @@ if uploaded_file:
     # Show the resulting DataFrame
     st.write('Cleansed Data')
     st.write(df)
-
-    # Download Button for cleansed DataFrame
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}">Download CSV File</a>'
-    st.markdown(href, unsafe_allow_html=True)
+    
+    # Export to CSV (as a Download Link)
+    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
