@@ -33,11 +33,19 @@ if uploaded_file:
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value'], errors='ignore', inplace=True)
     
-    # New Cleansing Steps
-    df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
-    df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
-    df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
-    
+# Convert 'Date Release' to datetime format and 'GRPT' to numeric if they are not
+df['Date Release'] = pd.to_datetime(df['Date Release'])
+df['GRPT'] = pd.to_numeric(df['GRPT'], errors='coerce')
+
+# Perform the date subtraction
+df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
+
+# Drop the original columns
+df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
+
+# Rename the new column
+df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
+   
     # Commenting out the DataFrame display to improve performance
     # st.write('Cleansed Data')
     # st.write(df)
