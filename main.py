@@ -21,7 +21,7 @@ if uploaded_file:
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
     
     # Delete all rows where value in column H contain "06-LE/FC-N"
-    df = df[df['H'] != '06-LE/FC-N']
+    df = df[df['Value'] != '06-LE/FC-N']
     
     # Show the resulting DataFrame
     st.write('Cleansed Data')
