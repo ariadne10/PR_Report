@@ -13,7 +13,7 @@ def get_table_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
 
     csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
     return href
     
@@ -37,9 +37,17 @@ if uploaded_file:
     # Delete all rows where value in column H contain "06-LE/FC-N"
     df = df[df['Value'] != '06-LE/FC-N']
     
+    # Additional Cleansing Steps
+    df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
+    df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
+    df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
+    df = df[df['Supply Source'] != 'SubstituteSupply']
+    df.drop(columns=['Des', 'Value'], errors='ignore', inplace=True)
+    
     # Show the resulting DataFrame
     st.write('Cleansed Data')
     st.write(df)
     
     # Export to CSV (as a Download Link)
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+
