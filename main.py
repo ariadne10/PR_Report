@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import base64
 
 # Upload button for Excel file
 uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
