@@ -20,7 +20,7 @@ uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file, skiprows=1)
-    columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
+    columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req', 'Action']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
@@ -32,6 +32,11 @@ if uploaded_file:
     df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value'], errors='ignore', inplace=True)
+    
+    # New Cleansing Steps
+    df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
+    df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
+    df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
     
     # Commenting out the DataFrame display to improve performance
     # st.write('Cleansed Data')
