@@ -2,7 +2,21 @@ import streamlit as st
 import pandas as pd
 import io
 import base64
+import datetime
 
+def get_table_download_link(df):
+    """Generates a link allowing the data in a given panda dataframe to be downloaded
+    in:  dataframe
+    out: href string
+    """
+    # Get current date
+    current_date = datetime.datetime.now().strftime('%m-%d-%y')
+
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
+    return href
+    
 # Upload button for Excel file
 uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 
