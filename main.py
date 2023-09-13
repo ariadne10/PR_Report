@@ -20,7 +20,7 @@ uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file, skiprows=1)
-    columns_to_remove = ['AH', 'AI', 'AJ', 'AC', 'AD']
+    columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
