@@ -44,10 +44,6 @@ if uploaded_file:
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value'], errors='ignore', inplace=True)
     
-    # Show the resulting DataFrame
-    st.write('Cleansed Data')
-    st.write(df)
-    
     # Export to CSV (as a Download Link)
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
