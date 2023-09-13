@@ -50,4 +50,4 @@ df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
     # st.write('Cleansed Data')
     # st.write(df)
     
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+st.markdown(get_table_download_link(df), unsafe_allow_html=True)
