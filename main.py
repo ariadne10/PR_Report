@@ -25,10 +25,14 @@ if uploaded_file:
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value', 'Action'], errors='ignore', inplace=True)
 
-    # Drop rows where 'Date Release' is null
-    df = df.dropna(subset=['Date Release'])
-
-    df['Date Release'] = pd.to_datetime(df['Date Release'])
-    df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
+    try:
+        df['Date Release'] = pd.to_datetime(df['Date Release'])
+        df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
+    except Exception as e:
+        problematic_values = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').isna(), 'Date Release']
+        st.write("Found problematic values in 'Date Release':", problematic_values)
+        st.write("Error:", str(e))
+        raise e
 
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+
