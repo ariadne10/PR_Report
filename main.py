@@ -24,7 +24,6 @@ if uploaded_file:
     
     df = df[df['Value'] != '06-LE/FC-N']
     
-    # Additional Cleansing Steps
     df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
     df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
     df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
@@ -37,14 +36,14 @@ if uploaded_file:
     df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
-    
+
     # Check if required columns exist
     required_columns = ['Total Dmnd', 'Net OH', 'PR Qty', 'Std Price', 'Delivery Date']
     if not set(required_columns).issubset(df.columns):
         missing_columns = set(required_columns) - set(df.columns)
         st.write(f"The following required columns are missing: {', '.join(missing_columns)}")
     else:
-        # Perform the data manipulations you specified
+        # Data manipulations
         df['1'] = df['Total Dmnd'] - df['Net OH']
         df['2'] = df['1'] >= df['PR Qty']
         df['3'] = df['1'] * df['Std Price']
@@ -58,17 +57,17 @@ if uploaded_file:
         
         # Remove time from "Delivery Date"
         df['Delivery Date'] = pd.to_datetime(df['Delivery Date']).dt.date
-        
+
         # Remove rows where column "3" is less than 500
         df = df[df['3'] >= 500]
         
         # Update "PR Qty" where column "2" is FALSE
         df.loc[df['2'] == False, 'PR Qty'] = df['1']
-        
+
         # Remove columns "1", "2", "3"
         df.drop(columns=['1', '2', '3'], inplace=True)
 
-        # Add two new columns "20%" and "Difference"
+        # Add new columns "20%" and "Difference"
         df['20%'] = df['Std Price'] * 0.2
         df['Difference'] = df['Std Price'] - df['20%']
 
@@ -80,5 +79,11 @@ if uploaded_file:
 
         # Rename "Std Price" to "Target Price"
         df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
-        
+
+        # Inserting two new columns "CONC" and "VLOOKUP" to the right of "BU Name"
+        bu_name_index = df.columns.get_loc('BU Name') + 1
+        df.insert(bu_name_index, "CONC", df['Site Code'].astype(str) + df['BU Name'].astype(str))
+        df.insert(bu_name_index + 1, "VLOOKUP", "")
+
+        # Generate download link
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
