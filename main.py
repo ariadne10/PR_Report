@@ -18,7 +18,7 @@ if uploaded_file:
     # Initial data cleansing
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
-    
+
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
     
@@ -31,7 +31,7 @@ if uploaded_file:
     
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value', 'Action', 'Indep Dmnd'], errors='ignore', inplace=True)
-    
+
     df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
     df['Date Release'] = pd.to_datetime(df['Date Release'])
     df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
@@ -40,26 +40,45 @@ if uploaded_file:
     
     # Check if required columns exist
     required_columns = ['Total Dmnd', 'Net OH', 'PR Qty', 'Std Price', 'Delivery Date']
-    missing_columns = [col for col in required_columns if col not in df.columns]
-    
-    if len(missing_columns) == 0:
-        # All required columns are present
-        # Rest of your code
-        col_index = df.columns.get_loc('Total Dmnd') + 1
-        df.insert(col_index, "1", df['Total Dmnd'] - df['Net OH'])
-        df.insert(col_index + 1, "2", df['1'] >= df['PR Qty'])
-        df.insert(col_index + 2, "3", df['1'] * df['Std Price'])
-        
+    if not set(required_columns).issubset(df.columns):
+        missing_columns = set(required_columns) - set(df.columns)
+        st.write(f"The following required columns are missing: {', '.join(missing_columns)}")
+    else:
+        # Perform the data manipulations you specified
+        df['1'] = df['Total Dmnd'] - df['Net OH']
+        df['2'] = df['1'] >= df['PR Qty']
+        df['3'] = df['1'] * df['Std Price']
+
+        # Reorder the columns
         col_names = df.columns.tolist()
         date_rel_index = col_names.index('Date Release')
         deliv_date_index = col_names.index('Delivery Date')
         col_names.insert(deliv_date_index, col_names.pop(date_rel_index))
         df = df[col_names]
         
+        # Remove time from "Delivery Date"
         df['Delivery Date'] = pd.to_datetime(df['Delivery Date']).dt.date
         
-        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        # Remove rows where column "3" is less than 500
+        df = df[df['3'] >= 500]
         
-    else:
-        # Some required columns are missing
-        st.write(f"The following required columns are missing: {', '.join(missing_columns)}")
+        # Update "PR Qty" where column "2" is FALSE
+        df.loc[df['2'] == False, 'PR Qty'] = df['1']
+        
+        # Remove columns "1", "2", "3"
+        df.drop(columns=['1', '2', '3'], inplace=True)
+
+        # Add two new columns "20%" and "Difference"
+        df['20%'] = df['Std Price'] * 0.2
+        df['Difference'] = df['Std Price'] - df['20%']
+
+        # Replace "Std Price" with "Difference"
+        df['Std Price'] = df['Difference']
+        
+        # Drop the "Difference" and "20%" columns
+        df.drop(columns=['Difference', '20%'], inplace=True)
+
+        # Rename "Std Price" to "Target Price"
+        df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
+        
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
