@@ -40,16 +40,21 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
 
-    # Add CONC column
+  # Add CONC column
     df['CONC'] = df['Site Code'].astype(str) + df['BU Name'].astype(str)
-    
+
     # Reading the 'S72 Sites and PICs' file
     df2 = pd.read_excel(uploaded_file2)
-    
-    # Get CONC values that need to be removed
-    remove_values = df2.loc[df2['Action'] == '** Remove **', 'CONC']
-    
-    # Remove rows from the main dataframe
-    df = df[~df['CONC'].isin(remove_values)]
-    
+
+    # Check if 'Action' and 'CONC' columns exist in df2
+    if 'Action' not in df2.columns or 'CONC' not in df2.columns:
+        st.write("Error: 'Action' or 'CONC' column not found in 'S72 Sites and PICs' file.")
+    else:
+        # Get CONC values that need to be removed
+        remove_values = df2.loc[df2['Action'] == '** Remove **', 'CONC']
+        
+        # Remove rows from the main dataframe
+        df = df[~df['CONC'].isin(remove_values)]
+
+    # Generate and display download link
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
