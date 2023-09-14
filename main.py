@@ -10,15 +10,15 @@ def get_table_download_link(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
     return href
 
-# File upload for the main file
 uploaded_file = st.file_uploader("Choose the main Excel file", type="xlsx")
-
-# File upload for the 'S72 Sites and PICs' file
 uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", type="xlsx")
 
 if uploaded_file and uploaded_file2:
-    # Reading the main file
     df = pd.read_excel(uploaded_file, skiprows=1)
+    df2 = pd.read_excel(uploaded_file2)
+
+    st.write(f"Columns in main file: {df.columns.tolist()}")
+    st.write(f"Columns in 'S72 Sites and PICs' file: {df2.columns.tolist()}")
     
     # Initial data cleansing
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
@@ -40,20 +40,16 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
 
-  # Add CONC column
+ # Add CONC column
     df['CONC'] = df['Site Code'].astype(str) + df['BU Name'].astype(str)
 
-    # Reading the 'S72 Sites and PICs' file
-    df2 = pd.read_excel(uploaded_file2)
-
-    # Check if 'Action' and 'CONC' columns exist in df2
-    if 'Action' not in df2.columns or 'CONC' not in df2.columns:
-        st.write("Error: 'Action' or 'CONC' column not found in 'S72 Sites and PICs' file.")
+    if 'ACTION' not in df2.columns or 'CONCATONATE' not in df2.columns:
+        st.write("Error: 'ACTION' or 'CONCATONATE' column not found in 'S72 Sites and PICs' file.")
     else:
-        # Get CONC values that need to be removed
-        remove_values = df2.loc[df2['Action'] == '** Remove **', 'CONC']
+        # Get CONCATONATE values that need to be removed based on ACTION column
+        remove_values = df2.loc[df2['ACTION'] == '** Remove **', 'CONCATONATE']
         
-        # Remove rows from the main dataframe
+        # Remove rows from the main dataframe based on CONC column
         df = df[~df['CONC'].isin(remove_values)]
 
     # Generate and display download link
