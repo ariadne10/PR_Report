@@ -40,15 +40,15 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
 
- # Add CONC column
+  # Add CONC column
     df['CONC'] = df['Site Code'].astype(str) + df['BU Name'].astype(str)
 
-    if 'ACTION' not in df2.columns or 'CONCATONATE' not in df2.columns:
-        st.write("Error: 'ACTION' or 'CONCATONATE' column not found in 'S72 Sites and PICs' file.")
+    # Get values from columns L and M in 'S72 Sites and PICs' file
+    try:
+        remove_values = df2.loc[df2.iloc[:, 13] == '** Remove **', df2.columns[12]]
+    except IndexError:
+        st.write("Error: Columns L and M not found in 'S72 Sites and PICs' file.")
     else:
-        # Get CONCATONATE values that need to be removed based on ACTION column
-        remove_values = df2.loc[df2['ACTION'] == '** Remove **', 'CONCATONATE']
-        
         # Remove rows from the main dataframe based on CONC column
         df = df[~df['CONC'].isin(remove_values)]
 
