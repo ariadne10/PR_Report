@@ -30,7 +30,7 @@ if uploaded_file:
     df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
     
     df = df[df['Supply Source'] != 'SubstituteSupply']
-    df.drop(columns=['Des', 'Value', 'Action'], errors='ignore', inplace=True)
+    df.drop(columns=['Des', 'Value', 'Action', 'Indep Dmnd'], errors='ignore', inplace=True)
     
     df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
     df['Date Release'] = pd.to_datetime(df['Date Release'])
@@ -39,16 +39,26 @@ if uploaded_file:
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
     
     # Check if required columns exist
-    required_columns = ['Total Dmnd', 'Net OH', 'PR Qty', 'Std Price']
+    required_columns = ['Total Dmnd', 'Net OH', 'PR Qty', 'Std Price', 'Delivery Date']
 
     if all(column in df.columns for column in required_columns):
-        # Insert 3 new columns
+        # Formatting Steps
         col_index = df.columns.get_loc('Total Dmnd') + 1
         df.insert(col_index, "1", df['Total Dmnd'] - df['Net OH'])
         df.insert(col_index + 1, "2", df['1'] >= df['PR Qty'])
         df.insert(col_index + 2, "3", df['1'] * df['Std Price'])
+
+        # Move 'Date Release' to the left of 'Delivery Date'
+        col_names = df.columns.tolist()
+        date_rel_index = col_names.index('Date Release')
+        deliv_date_index = col_names.index('Delivery Date')
+        col_names.insert(deliv_date_index, col_names.pop(date_rel_index))
+        df = df[col_names]
+
+        # Remove time from 'Delivery Date'
+        df['Delivery Date'] = pd.to_datetime(df['Delivery Date']).dt.date
         
         # Generate download link
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
     else:
-        st.write("One or more required columns ('Total Dmnd', 'Net OH', 'PR Qty', 'Std Price') are missing.")
+        st.write("One or more required columns ('Total Dmnd', 'Net OH', 'PR Qty', 'Std Price', 'Delivery Date') are missing.")
