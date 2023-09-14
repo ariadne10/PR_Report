@@ -10,14 +10,12 @@ def get_table_download_link(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
     return href
 
-# Upload the first file
 uploaded_file = st.file_uploader("Choose the first Excel file", type="xlsx")
+uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", type="xlsx")
 
-# Upload the second file
-uploaded_file2 = st.file_uploader("Choose the second Excel file", type="xlsx", key='file2')
-
-if uploaded_file:
+if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
+    df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
     
     # Initial data cleansing
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
@@ -35,47 +33,32 @@ if uploaded_file:
     df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
-    
-    # Position 'Date Release' next to 'Supply Source'
-    cols = df.columns.tolist()
-    cols.insert(cols.index('Supply Source') + 1, cols.pop(cols.index('Date Release')))
-    df = df[cols]
-
-    # Additional data processing
     df['1'] = df['Total Dmnd'] - df['Net OH']
     df['2'] = df['1'] >= df['PR Qty']
     df['3'] = df['1'] * df['Std Price']
-    df = df[df['3'] >= 500]
-    df.loc[df['2'] == False, 'PR Qty'] = df['1']
-    df.drop(columns=['1', '2', '3'], inplace=True)
-    df['20%'] = df['Std Price'] * 0.2
-    df['Difference'] = df['Std Price'] - df['20%']
-    df['Std Price'] = df['Difference']
-    df.drop(columns=['Difference', '20%'], inplace=True)
-    df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
+    
+    # Move 'Date Release' to the right of 'Supply Source'
+    reordered_cols = df.columns.tolist()
+    reordered_cols.insert(reordered_cols.index('Supply Source') + 1, reordered_cols.pop(reordered_cols.index('Date Release')))
+    df = df[reordered_cols]
+    
+    # Add 'CONC' column to the right of 'BU Name'
+    df['CONC'] = df['Site Code'].astype(str) + df['BU Name'].astype(str)
+    reordered_cols = df.columns.tolist()
+    reordered_cols.insert(reordered_cols.index('BU Name') + 1, 'CONC')
+    df = df[reordered_cols]
 
-    # Add CONC column to the right of 'BU Name'
-    df.insert(df.columns.get_loc('BU Name') + 1, 'CONC', df['Site Code'].astype(str) + df['BU Name'].astype(str))
-    
-    # Reorder 'Date Release' column to the right of 'Supply Source'
-    date_release_idx = df.columns.get_loc('Date Release')
-    supply_source_idx = df.columns.get_loc('Supply Source')
-    cols = list(df.columns)
-    cols.insert(supply_source_idx + 1, cols.pop(date_release_idx))
-    df = df[cols]
-    
-    if uploaded_file2:
-        df2 = pd.read_excel(uploaded_file2)
+    # Debug: Show column names to the user to debug
+    st.write(f"Debug: Column names in the uploaded files: {df.columns.tolist()}, {df2.columns.tolist()}")
+
+    # Checking and removing values
+    if 12 not in df2.columns or 13 not in df2.columns:
+        st.write("Error: Columns with index 12 and 13 not found in 'S72 Sites and PICs' file.")
+    else:
+        # Get values to be removed
+        remove_values = df2.iloc[:, 12][df2.iloc[:, 13] == '** Remove **']
         
-        # Debug: Show column names and shape of the DataFrame
-        if df2 is not None:
-            st.write(f"Debug: Column names in the second uploaded file: {df2.columns.tolist()}")
-            st.write(f"Debug: Shape of the second uploaded file: {df2.shape}")
+        # Remove rows from df
+        df = df[~df['CONC'].isin(remove_values)]
         
-        try:
-            remove_values = df2.iloc[:, 12][df2.iloc[:, 13] == '** Remove **']
-            df = df[~df['CONC'].isin(remove_values)]
-        except IndexError:
-            st.write("Index Error: The second uploaded file may not have enough columns.")
-    
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
