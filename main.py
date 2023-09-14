@@ -58,6 +58,10 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['Difference', '20%'], inplace=True)
     df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
 
+    # Debug: Show column names and shape of the DataFrame
+    st.write(f"Debug: Column names in the second uploaded file: {df2.columns.tolist()}")
+    st.write(f"Debug: Shape of the second uploaded file: {df2.shape}")
+
     # Remove rows based on 'S72 Sites and PICs' excel file
     remove_values = df2.iloc[:, 12][df2.iloc[:, 13] == '** Remove **']
     df = df[~df['CONC'].isin(remove_values)]
