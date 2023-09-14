@@ -10,18 +10,14 @@ def get_table_download_link(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
     return href
 
-uploaded_file = st.file_uploader("Choose the main Excel file", type="xlsx")
-uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", type="xlsx")
+# Upload the first file
+uploaded_file = st.file_uploader("Choose the first Excel file", type="xlsx")
 
-if uploaded_file and uploaded_file2:
+# Upload the second file
+uploaded_file2 = st.file_uploader("Choose the second Excel file", type="xlsx", key='file2')
+
+if uploaded_file:
     df = pd.read_excel(uploaded_file, skiprows=1)
-    df2 = pd.read_excel(uploaded_file2)
-
-    # Add CONC column and position it next to 'BU Name'
-    df['CONC'] = df['Site Code'].astype(str) + df['BU Name'].astype(str)
-    cols = df.columns.tolist()
-    cols.insert(cols.index('BU Name') + 1, cols.pop(cols.index('CONC')))
-    df = df[cols]
     
     # Initial data cleansing
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
@@ -58,13 +54,28 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['Difference', '20%'], inplace=True)
     df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
 
-    # Debug: Show column names and shape of the DataFrame
-    st.write(f"Debug: Column names in the second uploaded file: {df2.columns.tolist()}")
-    st.write(f"Debug: Shape of the second uploaded file: {df2.shape}")
-
-    # Remove rows based on 'S72 Sites and PICs' excel file
-    remove_values = df2.iloc[:, 12][df2.iloc[:, 13] == '** Remove **']
-    df = df[~df['CONC'].isin(remove_values)]
+    # Add CONC column to the right of 'BU Name'
+    df.insert(df.columns.get_loc('BU Name') + 1, 'CONC', df['Site Code'].astype(str) + df['BU Name'].astype(str))
     
-    # Show download link
+    # Reorder 'Date Release' column to the right of 'Supply Source'
+    date_release_idx = df.columns.get_loc('Date Release')
+    supply_source_idx = df.columns.get_loc('Supply Source')
+    cols = list(df.columns)
+    cols.insert(supply_source_idx + 1, cols.pop(date_release_idx))
+    df = df[cols]
+    
+    if uploaded_file2:
+        df2 = pd.read_excel(uploaded_file2)
+        
+        # Debug: Show column names and shape of the DataFrame
+        if df2 is not None:
+            st.write(f"Debug: Column names in the second uploaded file: {df2.columns.tolist()}")
+            st.write(f"Debug: Shape of the second uploaded file: {df2.shape}")
+        
+        try:
+            remove_values = df2.iloc[:, 12][df2.iloc[:, 13] == '** Remove **']
+            df = df[~df['CONC'].isin(remove_values)]
+        except IndexError:
+            st.write("Index Error: The second uploaded file may not have enough columns.")
+    
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
