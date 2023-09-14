@@ -14,49 +14,38 @@ uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file, skiprows=1)
-
+    
     # Initial data cleansing
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
-    
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
-    
     df = df[df['Value'] != '06-LE/FC-N']
-
-    # Additional Cleansing Steps
     df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
     df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
     df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
-
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value', 'Action'], errors='ignore', inplace=True)
-
-    # Handle Date
+    
+    # Date handling
     df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
     df['Date Release'] = pd.to_datetime(df['Date Release'])
     df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
 
-    # Additional Steps
-    if all(col in df.columns for col in ['Total Dmnd', 'Net OH', 'PR Qty', 'STD Price']):
-        col_idx = df.columns.get_loc('Total Dmnd') + 1
-        df.insert(col_idx, '1', 0)
-        df.insert(col_idx + 1, '2', False)
-        df.insert(col_idx + 2, '3', 0)
-
-        # Calculate value for column '1'
-        df['1'] = df['Total Dmnd'] - df['Net OH']
-
-        # Calculate value for column '2'
-        df['2'] = df['1'] >= df['PR Qty']
-
-        # Calculate value for column '3'
-        df['3'] = df['1'] * df['STD Price']
+    # Checking if all necessary columns are present
+    necessary_columns = ['Total Dmnd', 'Net OH', 'PR Qty', 'Std Price']
+    if all(elem in df.columns for elem in necessary_columns):
+        # Insert new columns after "Total Dmnd"
+        col_index = df.columns.get_loc('Total Dmnd') + 1
+        df.insert(col_index, '1', df['Total Dmnd'] - df['Net OH'])
+        df.insert(col_index + 1, '2', df['1'] >= df['PR Qty'])
+        df.insert(col_index + 2, '3', df['1'] * df['Std Price'])
+        
+        # Display the DataFrame and the download link
+        st.write(df)
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
     else:
-        st.write("One or more required columns ('Total Dmnd', 'Net OH', 'PR Qty', 'STD Price') are missing.")
-
-    # Download button
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        st.write("One or more required columns ('Total Dmnd', 'Net OH', 'PR Qty', 'Std Price') are missing.")
