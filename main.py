@@ -80,10 +80,16 @@ if uploaded_file:
         # Rename "Std Price" to "Target Price"
         df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
 
-        # Inserting two new columns "CONC" and "VLOOKUP" to the right of "BU Name"
-        bu_name_index = df.columns.get_loc('BU Name') + 1
-        df.insert(bu_name_index, "CONC", df['Site Code'].astype(str) + df['BU Name'].astype(str))
-        df.insert(bu_name_index + 1, "VLOOKUP", "")
+# Inserting two new columns "CONC" and "VLOOKUP" to the right of "BU Name"
+try:
+    bu_name_index = df.columns.get_loc('BU Name') + 1
+    df.insert(bu_name_index, "CONC", df['Site Code'].astype(str) + df['BU Name'].astype(str))
+    df.insert(bu_name_index + 1, "VLOOKUP", "")
+except KeyError:
+    st.write("Column 'BU Name' not found in the DataFrame.")
+
+# Display DataFrame to debug
+st.dataframe(df)
 
         # Generate download link
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
