@@ -32,25 +32,34 @@ if uploaded_file:
     df = df[df['Supply Source'] != 'SubstituteSupply']
     df.drop(columns=['Des', 'Value', 'Action'], errors='ignore', inplace=True)
     
-    # Identify problematic date values
+    # Handle problematic date values
     problematic_values = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').isna(), 'Date Release']
     
     if not problematic_values.empty:
         st.write("Found problematic values in 'Date Release':", problematic_values)
     
-    # Remove or handle problematic date values (for demonstration removing them)
     df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
-    
-    # Now do the datetime conversion
     df['Date Release'] = pd.to_datetime(df['Date Release'])
     df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
     
-    # Remove 'GRPT' and 'Date Release'
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
-    
-    # Rename 'Date Release1' to 'Date Release'
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
+    
+    # Additional Steps
+    # 1. Insert 3 new columns
+    col_idx = df.columns.get_loc('Total Dmnd') + 1
+    df.insert(col_idx, '1', 0)
+    df.insert(col_idx + 1, '2', False)
+    df.insert(col_idx + 2, '3', 0)
+    
+    # 2. Calculate value for column '1'
+    df['1'] = df['Total Dmnd'] - df['Net OH']
+    
+    # 3. Calculate value for column '2'
+    df['2'] = df['1'] >= df['PR QTY']
+    
+    # 4. Calculate value for column '3'
+    df['3'] = df['1'] * df['STD Price']
     
     # Download button
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
-
