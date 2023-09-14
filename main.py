@@ -10,14 +10,18 @@ def get_table_download_link(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
     return href
 
-uploaded_file = st.file_uploader("Choose the first Excel file", type="xlsx")
+uploaded_file = st.file_uploader("Choose the main Excel file", type="xlsx")
 uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", type="xlsx")
 
 if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
     df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
-    
-    # Initial data cleansing
+
+    # Debug: Show column names to the user to debug
+    st.write(f"Debug: Column names in the uploaded main file: {df.columns.tolist()}")
+    st.write(f"Debug: Column names in the uploaded 'S72 Sites and PICs' file: {df2.columns.tolist()}")
+
+    # Initial data cleansing for df
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
@@ -33,32 +37,21 @@ if uploaded_file and uploaded_file2:
     df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
-    df['1'] = df['Total Dmnd'] - df['Net OH']
-    df['2'] = df['1'] >= df['PR Qty']
-    df['3'] = df['1'] * df['Std Price']
-    
-    # Move 'Date Release' to the right of 'Supply Source'
-    reordered_cols = df.columns.tolist()
-    reordered_cols.insert(reordered_cols.index('Supply Source') + 1, reordered_cols.pop(reordered_cols.index('Date Release')))
-    df = df[reordered_cols]
-    
-    # Add 'CONC' column to the right of 'BU Name'
-    df['CONC'] = df['Site Code'].astype(str) + df['BU Name'].astype(str)
-    reordered_cols = df.columns.tolist()
-    reordered_cols.insert(reordered_cols.index('BU Name') + 1, 'CONC')
-    df = df[reordered_cols]
 
-    # Debug: Show column names to the user to debug
-    st.write(f"Debug: Column names in the uploaded files: {df.columns.tolist()}, {df2.columns.tolist()}")
+    # Get values to be removed
+    remove_values = df2['CONC'][df2['Action'] == '** Remove **']
 
-    # Checking and removing values
-    if 12 not in df2.columns or 13 not in df2.columns:
-        st.write("Error: Columns with index 12 and 13 not found in 'S72 Sites and PICs' file.")
-    else:
-        # Get values to be removed
-        remove_values = df2.iloc[:, 12][df2.iloc[:, 13] == '** Remove **']
-        
-        # Remove rows from df
-        df = df[~df['CONC'].isin(remove_values)]
-        
+    # Remove rows where 'CONC' value is in remove_values
+    df = df[~df['CONC'].isin(remove_values)]
+
+    # Reorder columns
+    reordered_columns = [
+        'SomeColumn', 'Supply Source', 'Date Release',
+        'AnotherColumn', 'BU Name', 'CONC'
+    ]  # Replace 'SomeColumn' and 'AnotherColumn' with actual column names
+    df = df[reordered_columns]
+
+    # Debug: Show reordered column names to the user to debug
+    st.write(f"Debug: Reordered column names in the main file: {df.columns.tolist()}")
+
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
