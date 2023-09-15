@@ -17,17 +17,12 @@ if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
     df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
     
-    # Trim whitespace from 'Action' column in df2
-    df2['Action'] = df2['Action'].str.strip()
-    
-    # Debug: Show some rows of both DataFrames to understand their structure
-    st.write("Debug: First few rows of the main DataFrame:")
-    st.write(df.head())
-    st.write("Debug: First few rows of the 'S72 Sites and PICs' DataFrame:")
-    st.write(df2.head())
+    # Trim whitespace from 'Action.1' column in df2
+    df2['Action.1'] = df2['Action.1'].str.strip()
 
-    # Debug: Show unique values in the 'Action' column of df2
-    st.write(f"Debug: Unique 'Action' values in the 'S72 Sites and PICs' file: {df2['Action'].unique()}")
+    # Debug: Data types of 'CONC' columns
+    st.write(f"Debug: Data type of 'CONC' in main file: {df['CONC'].dtype}")
+    st.write(f"Debug: Data type of 'CONC' in 'S72 Sites and PICs' file: {df2['CONC'].dtype}")
 
     # Additional Data Cleansing Steps
     df['Site Code'] = df['Site Code'].str.replace('_', '')
@@ -37,16 +32,20 @@ if uploaded_file and uploaded_file2:
     df['CONC'] = df['Site Code'] + df['BU Name']
     
     # Remove rows based on 'S72 Sites and PICs' file
-    remove_values = df2[df2['Action'] == '** Remove **']['CONC'].tolist()
+    remove_values = df2[df2['Action.1'] == '** Remove **']['CONC'].tolist()
 
     # Debug: Show the 'CONC' values that should be removed
     st.write(f"Debug: 'CONC' values to be removed based on 'S72 Sites and PICs' file: {remove_values}")
 
+    # Debug: Explicitly print rows before removal
+    st.write("Debug: Rows in main DataFrame before removal:")
+    st.write(df[df['CONC'].isin(remove_values)])
+
     df = df[~df['CONC'].isin(remove_values)]
 
-    # Debug: Show some rows of the filtered DataFrame to confirm rows are removed
-    st.write("Debug: First few rows of the main DataFrame after filtering:")
-    st.write(df.head())
+    # Debug: Explicitly print rows after removal
+    st.write("Debug: Rows in main DataFrame after removal:")
+    st.write(df[df['CONC'].isin(remove_values)])
 
     # Reorder columns to place 'CONC' after 'BU Name'
     cols = df.columns.tolist()
