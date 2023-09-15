@@ -89,11 +89,21 @@ if uploaded_file and uploaded_file2:
     # Remove "Part Description" column
     df.drop(columns=['Part Description'], errors='ignore', inplace=True)
 
+   # Debug: Show unique values in the 'BU Name' and 'Manufacturer' columns
+    st.write(f"Debug: Unique values in 'BU Name': {df['BU Name'].unique()}")
+    st.write(f"Debug: Unique values in 'Manufacturer': {df['Manufacturer'].unique()}")
+
+    # Remove "Part Description" column
+    df.drop(columns=['Part Description'], errors='ignore', inplace=True)
+
     # Remove rows where "BU Name" is "EMERSON" or "EMERSONPM" and "Manufacturer" is "INTEGRATED SILICON SOLUTIONS (ISSI)"
     rows_to_remove = df[
         (df['BU Name'].isin(['EMERSON', 'EMERSONPM'])) 
-        & (df['Manufacturer'] == 'INTEGRATED SILICON SOLUTIONS (ISSI)')
+        & (df['Manufacturer'].str.contains('INTEGRATED SILICON SOLUTIONS \(ISSI\)', case=False, na=False))
     ].index
+
+    if len(rows_to_remove) > 0:
+        df.drop(rows_to_remove, inplace=True)
 
     if len(rows_to_remove) > 0:
         df.drop(rows_to_remove, inplace=True)
