@@ -89,13 +89,16 @@ if uploaded_file and uploaded_file2:
     # Remove "Part Description" column
     df.drop(columns=['Part Description'], errors='ignore', inplace=True)
 
-    # Remove rows where "BU Name" is "EMERSON" or "EMERSONPM" and "Manufacturer" is "ISSI"
+    # Remove rows where "BU Name" is "EMERSON" or "EMERSONPM" and "Manufacturer" is "INTEGRATED SILICON SOLUTIONS (ISSI)"
     rows_to_remove = df[
         (df['BU Name'].isin(['EMERSON', 'EMERSONPM'])) 
-        & (df['Manufacturer'] == 'ISSI')
+        & (df['Manufacturer'] == 'INTEGRATED SILICON SOLUTIONS (ISSI)')
     ].index
 
     if len(rows_to_remove) > 0:
         df.drop(rows_to_remove, inplace=True)
 
+     # Debug: Show the number of rows removed
+    st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
+    
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
