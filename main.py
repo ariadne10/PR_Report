@@ -22,7 +22,7 @@ if uploaded_file and uploaded_file2:
     st.write(f"Debug: Column names in the uploaded 'S72 Sites and PICs' file: {df2.columns.tolist()}")
 
     # Create the 'CONC' column by combining 'BU Name' and 'Site Code'
-    df['CONC'] = df['BU Name'] + " " + df['Site Code']
+    df['CONC'] = df['BU Name'] + df['Site Code']
 
     # Initial data cleansing for df
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
