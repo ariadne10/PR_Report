@@ -19,7 +19,10 @@ if uploaded_file and uploaded_file2:
     
     # Trim whitespace from 'Action.1' column in df2
     df2['Action.1'] = df2['Action.1'].str.strip()
-
+    
+    # Create 'CONC' column
+    df['CONC'] = df['Site Code'] + df['BU Name']
+    
     # Debug: Data types of 'CONC' columns
     st.write(f"Debug: Data type of 'CONC' in main file: {df['CONC'].dtype}")
     st.write(f"Debug: Data type of 'CONC' in 'S72 Sites and PICs' file: {df2['CONC'].dtype}")
@@ -27,9 +30,6 @@ if uploaded_file and uploaded_file2:
     # Additional Data Cleansing Steps
     df['Site Code'] = df['Site Code'].str.replace('_', '')
     df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
-  
-    # Create 'CONC' column
-    df['CONC'] = df['Site Code'] + df['BU Name']
     
     # Remove rows based on 'S72 Sites and PICs' file
     remove_values = df2[df2['Action.1'] == '** Remove **']['CONC'].tolist()
