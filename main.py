@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import base64
 import datetime
+import re
 
 def get_table_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
@@ -35,42 +36,19 @@ if uploaded_file and uploaded_file2:
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
 
-    # New requirements
+   # Debug: Print available columns in main DataFrame
+    st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
 
-    # First, create a filtered DataFrame based on 'BU Name' and 'Part Description'
-    filtered_df = df[(df['BU Name'] == 'CRESTRON') & df['Part Description'].str.contains("PROG", na=False)]
+    # Filter and remove rows based on 'BU Name', 'Part Description', and 'Mfr Part Code'
+    df = df[~((df['BU Name'] == 'CRESTRON') 
+              & df['Part Description'].str.contains("PROG", na=False) 
+              & df['Mfr Part Code'].str.contains(r'\([^)]*\)', regex=True, na=False))]
 
-    # Identify rows in the filtered DataFrame that have a pattern (xxx-x) in 'Mfr Part Code'
-    # where x can be a letter or a digit. We use \w+ to indicate one or more word characters.
-    rows_to_remove = filtered_df[filtered_df['Mfr Part Code'].str.contains(r"\(\w+-\w+\)", regex=True, na=False)].index
-    
-    # Debug: Show the index values to be removed
-    st.write(f"Debug: Index values to be removed: {rows_to_remove}")
-    
-    # Remove those rows from the original DataFrame if any such rows exist
-    if len(rows_to_remove) > 0:
-        df.drop(rows_to_remove, inplace=True)
-
-    # Debug: Show the first few rows of the filtered DataFrame
+    # Debug: Print the first few rows of the DataFrame after filtering
     st.write(f"Debug: First few rows of the filtered DataFrame based on 'BU Name' and 'Part Description':")
-    st.dataframe(filtered_df.head())
-    
-    # Identify rows in the filtered DataFrame that have a pattern (xxx-x) in 'Mfr Part Code'
-    # where x can be a letter or a digit. We use \w+ to indicate one or more word characters.
-    rows_to_remove = filtered_df[filtered_df['Mfr Part Code'].str.contains(r"\(\w+-\w+\)", regex=True, na=False)].index
-    
-    # Debug: Show the index values to be removed
-    st.write(f"Debug: Index values to be removed: {rows_to_remove}")
-    
-    # Remove those rows from the original DataFrame if any such rows exist
-    if len(rows_to_remove) > 0:
-        df.drop(rows_to_remove, inplace=True)
-    
-    # Debug: Show the first few rows of df after attempting to remove rows
-    st.write("Debug: First few rows of df after attempting to remove rows:")
-    st.dataframe(df.head())
-    
-    # Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
+    st.write(df.head())
+
+    # Remove rows if 'A & J PROGRAMMING' or 'MEXSER' is present under 'Manufacturer' column
     df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
     
     # Additional data cleansing
