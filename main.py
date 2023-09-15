@@ -38,7 +38,7 @@ if uploaded_file and uploaded_file2:
     # New requirements
 
     # First, create a filtered DataFrame based on 'BU Name' and 'Part Description'
-    filtered_df = df[(df['BU Name'] == 'Crestron') & df['Part Description'].str.contains("PROG", na=False)]
+    filtered_df = df[(df['BU Name'] == 'CRESTRON') & df['Part Description'].str.contains("PROG", na=False)]
 
     # Identify rows in the filtered DataFrame that have a pattern (xxx-x) in 'Mfr Part Code'
     # where x can be a letter or a digit. We use \w+ to indicate one or more word characters.
