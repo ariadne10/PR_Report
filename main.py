@@ -73,7 +73,6 @@ if uploaded_file and uploaded_file2:
         # Finalize the DataFrame
         df = df[df['3'] >= 500]
         df.loc[df['2'] == False, 'PR Qty'] = df['1']
-        df.drop(columns=['1', '2', '3'], inplace=True)
 
         # Create and remove temporary columns
         df['20%'] = df['Std Price'] * 0.2
