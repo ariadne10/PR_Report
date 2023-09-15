@@ -35,19 +35,19 @@ if uploaded_file and uploaded_file2:
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
 
-    # New requirements
+  # New requirements
+    # Create a mask for the conditions
+    mask = (df['BU Name'] == 'Crestron') & \
+        df['Part Description'].str.contains("PROG", na=False) & \
+        df['Mfr Part Code'].str.contains(r"\(", regex=True, na=False)
 
-    # First, create a filtered DataFrame based on 'BU Name' and 'Part Description'
-    filtered_df = df[(df['BU Name'] == 'Crestron') & df['Part Description'].str.contains("PROG", na=False)]
-
-    # Identify rows in the filtered DataFrame that have "(" in 'Mfr Part Code'
-    rows_to_remove = filtered_df[filtered_df['Mfr Part Code'].str.contains("(", na=False)].index
-
-    # Remove those rows from the original DataFrame
-    df.drop(rows_to_remove, inplace=True)
+    # Remove rows based on the mask
+    df = df[~mask]
 
     # Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
     df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
+        # Remove those rows from the original DataFrame
+        df.drop(rows_to_remove, inplace=True)
 
     # Additional data cleansing
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
