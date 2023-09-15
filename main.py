@@ -22,7 +22,7 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
   
     # Create 'CONC' column
-    df['CONC'] = df['BU Name'] + df['Site Code']
+    df['CONC'] = df['Site Code'] + df['BU Name']
 
     # Debug: Show column names to the user to debug
     st.write(f"Debug: Column names in the main file: {df.columns.tolist()}")
