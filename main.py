@@ -17,6 +17,9 @@ if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
     df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
     
+    # Trim whitespace from 'Action' column in df2
+    df2['Action'] = df2['Action'].str.strip()
+    
     # Debug: Show some rows of both DataFrames to understand their structure
     st.write("Debug: First few rows of the main DataFrame:")
     st.write(df.head())
