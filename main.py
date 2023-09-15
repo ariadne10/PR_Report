@@ -24,6 +24,10 @@ if uploaded_file and uploaded_file2:
     # Create 'CONC' column
     df['CONC'] = df['Site Code'] + df['BU Name']
     
+    # Remove rows based on 'S72 Sites and PICs' file
+    remove_values = df2[df2['Action'] == '** Remove **']['CONC'].tolist()
+    df = df[~df['CONC'].isin(remove_values)]
+
     # Reorder columns to place 'CONC' after 'BU Name'
     cols = df.columns.tolist()
     cols.remove('CONC')
