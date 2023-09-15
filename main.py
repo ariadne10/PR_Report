@@ -88,25 +88,26 @@ if uploaded_file and uploaded_file2:
 
     # Remove "Part Description" column
     df.drop(columns=['Part Description'], errors='ignore', inplace=True)
-
-   # Debug: Show unique values in the 'BU Name' and 'Manufacturer' columns
+   
+    # Debug: Show unique values in 'BU Name' and 'Manufacturer'
     st.write(f"Debug: Unique values in 'BU Name': {df['BU Name'].unique()}")
     st.write(f"Debug: Unique values in 'Manufacturer': {df['Manufacturer'].unique()}")
 
     # Remove "Part Description" column
     df.drop(columns=['Part Description'], errors='ignore', inplace=True)
 
-    # Remove rows where "BU Name" is "EMERSON" or "EMERSONPM" and "Manufacturer" is "INTEGRATED SILICON SOLUTIONS (ISSI)"
+    # Filter rows where 'BU Name' is 'EMERSON' or 'EMERSONPM' and 'Manufacturer' is 'INTEGRATED SILICON SOLUTIONS (ISSI)'
     rows_to_remove = df[
         (df['BU Name'].isin(['EMERSON', 'EMERSONPM'])) 
         & (df['Manufacturer'].str.contains('INTEGRATED SILICON SOLUTIONS \(ISSI\)', case=False, na=False))
     ].index
+    
+    # Debug: Show index values to be removed
+    st.write(f"Debug: Index values to be removed: {rows_to_remove}")
 
+    # Remove rows if they exist in the DataFrame
     if len(rows_to_remove) > 0:
-        df.drop(rows_to_remove, inplace=True)
-
-    if len(rows_to_remove) > 0:
-        df.drop(rows_to_remove, inplace=True)
+        df.drop(rows_to_remove.intersection(df.index), inplace=True)
 
      # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
