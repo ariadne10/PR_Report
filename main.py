@@ -21,6 +21,9 @@ if uploaded_file and uploaded_file2:
     st.write(f"Debug: Column names in the uploaded main file: {df.columns.tolist()}")
     st.write(f"Debug: Column names in the uploaded 'S72 Sites and PICs' file: {df2.columns.tolist()}")
 
+    # Create the 'CONC' column by combining 'BU Name' and 'Site Code'
+    df['CONC'] = df['BU Name'] + " " + df['Site Code']
+
     # Initial data cleansing for df
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
@@ -38,24 +41,23 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
 
-# Check if 'CONC' exists in df before attempting to filter
-if 'CONC' in df.columns:
-    remove_values = df2['CONC'][df2['Action'] == '** Remove **']
+    # Additional calculations
+    df['1'] = df['Total Dmnd'] - df['Net OH']
+    df['2'] = df['1'] >= df['PR Qty']
+    df['3'] = df['1'] * df['Std Price']
+
+    # Remove values based on the second file
+    remove_values = df2[df2['Action'] == '** Remove **']['CONC']
     df = df[~df['CONC'].isin(remove_values)]
-else:
-    st.write(f"Warning: 'CONC' column not found in the main file. Skipping removal step.")
 
-    # Remove rows where 'CONC' value is in remove_values
-    df = df[~df['CONC'].isin(remove_values)]
+    # Reordering columns to place 'Date Release' to the right of 'Supply Source' and 'CONC' to the right of 'BU Name'
+    column_order = [col for col in df.columns if col not in ['Date Release', 'CONC']]
+    index_date_release = column_order.index('Supply Source') + 1
+    index_conc = column_order.index('BU Name') + 1
+    column_order.insert(index_date_release, 'Date Release')
+    column_order.insert(index_conc, 'CONC')
+    df = df[column_order]
 
-    # Reorder columns
-    reordered_columns = [
-        'SomeColumn', 'Supply Source', 'Date Release',
-        'AnotherColumn', 'BU Name', 'CONC'
-    ]  # Replace 'SomeColumn' and 'AnotherColumn' with actual column names
-    df = df[reordered_columns]
-
-    # Debug: Show reordered column names to the user to debug
-    st.write(f"Debug: Reordered column names in the main file: {df.columns.tolist()}")
-
+    # Display DataFrame and download link
+    st.write(df)
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
