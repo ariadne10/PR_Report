@@ -16,93 +16,74 @@ uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", 
 if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
     df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
-    
+
+    # Debug: Print available columns in main DataFrame
+    st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
+
     # Trim whitespace from 'Action.1' column in df2
     df2['Action.1'] = df2['Action.1'].str.strip()
-    
-    # Create 'CONC' column
-    df['CONC'] = df['Site Code'] + df['BU Name']
-    
-    # Debug: Data types of 'CONC' columns
-    st.write(f"Debug: Data type of 'CONC' in main file: {df['CONC'].dtype}")
-    st.write(f"Debug: Data type of 'CONC' in 'S72 Sites and PICs' file: {df2['CONC'].dtype}")
 
-    # Additional Data Cleansing Steps
-    df['Site Code'] = df['Site Code'].str.replace('_', '')
-    df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
-    
-    # Remove rows based on 'S72 Sites and PICs' file
-    remove_values = df2[df2['Action.1'] == '** Remove **']['CONC'].tolist()
+    try:
+        # Additional Data Cleansing Steps
+        df['Site Code'] = df['Site Code'].str.replace('_', '')
+        df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
 
-    # Debug: Show the 'CONC' values that should be removed
-    st.write(f"Debug: 'CONC' values to be removed based on 'S72 Sites and PICs' file: {remove_values}")
+        # Create 'CONC' column
+        df['CONC'] = df['Site Code'] + df['BU Name']
 
-    # Debug: Explicitly print rows before removal
-    st.write("Debug: Rows in main DataFrame before removal:")
-    st.write(df[df['CONC'].isin(remove_values)])
+        # Debug: Data types of 'CONC' columns
+        st.write(f"Debug: Data type of 'CONC' in main file: {df['CONC'].dtype}")
+        st.write(f"Debug: Data type of 'CONC' in 'S72 Sites and PICs' file: {df2['CONC'].dtype}")
 
-    df = df[~df['CONC'].isin(remove_values)]
+        # Remove rows based on 'S72 Sites and PICs' file
+        remove_values = df2[df2['Action.1'] == '** Remove **']['CONC'].tolist()
+        
+        # Debug: Show the 'CONC' values that should be removed
+        st.write(f"Debug: 'CONC' values to be removed based on 'S72 Sites and PICs' file: {remove_values}")
 
-    # Debug: Explicitly print rows after removal
-    st.write("Debug: Rows in main DataFrame after removal:")
-    st.write(df[df['CONC'].isin(remove_values)])
+        df = df[~df['CONC'].isin(remove_values)]
 
-    # Reorder columns to place 'CONC' after 'BU Name'
-    cols = df.columns.tolist()
-    cols.remove('CONC')
-    target_idx = cols.index('BU Name') + 1
-    cols = cols[:target_idx] + ['CONC'] + cols[target_idx:]
-    df = df[cols]
-  
-    # Reorder columns to place 'Date Release' to the right of 'Supply Source'
-    cols = df.columns.tolist()
-    cols.remove('Date Release')
-    target_idx = cols.index('Supply Source') + 1
-    cols = cols[:target_idx] + ['Date Release'] + cols[target_idx:]
-    df = df[cols]
+        # More data cleansing steps
+        columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
+        df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
 
-    # Debug: Show column names to the user to debug
-    st.write(f"Debug: Column names in the main file: {df.columns.tolist()}")
-    st.write(f"Debug: Column names in the 'S72 Sites and PICs' file: {df2.columns.tolist()}")
+        df = df[df['Part Profit Center Profit Center'] != 'PAAS']
+        df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
+        df = df[df['Value'] != '06-LE/FC-N']
 
-    # More data cleansing steps
-    columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
-    df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
+        # Additional cleansing
+        df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
+        df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
+        df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
+        df = df[df['Supply Source'] != 'SubstituteSupply']
+        df.drop(columns=['Des', 'Value', 'Action', 'Indep Dmnd'], errors='ignore', inplace=True)
 
-    df = df[df['Part Profit Center Profit Center'] != 'PAAS']
-    df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
-    df = df[df['Value'] != '06-LE/FC-N']
+        # Convert to datetime and create new columns
+        df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
+        df['Date Release'] = pd.to_datetime(df['Date Release'])
+        df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
+        df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
+        df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
+        
+        # Additional calculations
+        df['1'] = df['Total Dmnd'] - df['Net OH']
+        df['2'] = df['1'] >= df['PR Qty']
+        df['3'] = df['1'] * df['Std Price']
 
-    # Additional cleansing
-    df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
-    df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
-    df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
-    df = df[df['Supply Source'] != 'SubstituteSupply']
-    df.drop(columns=['Des', 'Value', 'Action', 'Indep Dmnd'], errors='ignore', inplace=True)
+        # Finalize the DataFrame
+        df = df[df['3'] >= 500]
+        df.loc[df['2'] == False, 'PR Qty'] = df['1']
+        df.drop(columns=['1', '2', '3'], inplace=True)
 
-    # Convert to datetime and create new columns
-    df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
-    df['Date Release'] = pd.to_datetime(df['Date Release'])
-    df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
-    df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
-    df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
-    
-    # Additional calculations
-    df['1'] = df['Total Dmnd'] - df['Net OH']
-    df['2'] = df['1'] >= df['PR Qty']
-    df['3'] = df['1'] * df['Std Price']
+        # Create and remove temporary columns
+        df['20%'] = df['Std Price'] * 0.2
+        df['Difference'] = df['Std Price'] - df['20%']
+        df['Std Price'] = df['Difference']
+        df.drop(columns=['Difference', '20%'], inplace=True)
+        df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
 
-    # Finalize the DataFrame
-    df = df[df['3'] >= 500]
-    df.loc[df['2'] == False, 'PR Qty'] = df['1']
-    df.drop(columns=['1', '2', '3'], inplace=True)
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
-    # Create and remove temporary columns
-    df['20%'] = df['Std Price'] * 0.2
-    df['Difference'] = df['Std Price'] - df['20%']
-    df['Std Price'] = df['Difference']
-    df.drop(columns=['Difference', '20%'], inplace=True)
-    df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
-
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+    except KeyError as e:
+        st.write(f"Debug: KeyError encountered: {e}")
 
