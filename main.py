@@ -16,6 +16,15 @@ uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", 
 if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
     df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
+    
+    # Debug: Show some rows of both DataFrames to understand their structure
+    st.write("Debug: First few rows of the main DataFrame:")
+    st.write(df.head())
+    st.write("Debug: First few rows of the 'S72 Sites and PICs' DataFrame:")
+    st.write(df2.head())
+
+    # Debug: Show unique values in the 'Action' column of df2
+    st.write(f"Debug: Unique 'Action' values in the 'S72 Sites and PICs' file: {df2['Action'].unique()}")
 
     # Additional Data Cleansing Steps
     df['Site Code'] = df['Site Code'].str.replace('_', '')
@@ -26,7 +35,15 @@ if uploaded_file and uploaded_file2:
     
     # Remove rows based on 'S72 Sites and PICs' file
     remove_values = df2[df2['Action'] == '** Remove **']['CONC'].tolist()
+
+    # Debug: Show the 'CONC' values that should be removed
+    st.write(f"Debug: 'CONC' values to be removed based on 'S72 Sites and PICs' file: {remove_values}")
+
     df = df[~df['CONC'].isin(remove_values)]
+
+    # Debug: Show some rows of the filtered DataFrame to confirm rows are removed
+    st.write("Debug: First few rows of the main DataFrame after filtering:")
+    st.write(df.head())
 
     # Reorder columns to place 'CONC' after 'BU Name'
     cols = df.columns.tolist()
@@ -45,10 +62,6 @@ if uploaded_file and uploaded_file2:
     # Debug: Show column names to the user to debug
     st.write(f"Debug: Column names in the main file: {df.columns.tolist()}")
     st.write(f"Debug: Column names in the 'S72 Sites and PICs' file: {df2.columns.tolist()}")
-
-    # Remove rows based on 'S72 Sites and PICs' file
-    remove_values = df2[df2['Action'] == '** Remove **']['CONC'].tolist()
-    df = df[~df['CONC'].isin(remove_values)]
 
     # More data cleansing steps
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
