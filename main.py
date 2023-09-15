@@ -46,8 +46,8 @@ if uploaded_file and uploaded_file2:
 
     # Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
     df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
-        # Remove those rows from the original DataFrame
-        df.drop(rows_to_remove, inplace=True)
+    # Remove those rows from the original DataFrame
+    df.drop(rows_to_remove, inplace=True)
 
     # Additional data cleansing
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
