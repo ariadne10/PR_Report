@@ -50,6 +50,25 @@ if uploaded_file and uploaded_file2:
     # Remove those rows from the original DataFrame if any such rows exist
     if len(rows_to_remove) > 0:
         df.drop(rows_to_remove, inplace=True)
+
+    # Debug: Show the first few rows of the filtered DataFrame
+    st.write(f"Debug: First few rows of the filtered DataFrame based on 'BU Name' and 'Part Description':")
+    st.dataframe(filtered_df.head())
+    
+    # Identify rows in the filtered DataFrame that have a pattern (xxx-x) in 'Mfr Part Code'
+    # where x can be a letter or a digit. We use \w+ to indicate one or more word characters.
+    rows_to_remove = filtered_df[filtered_df['Mfr Part Code'].str.contains(r"\(\w+-\w+\)", regex=True, na=False)].index
+    
+    # Debug: Show the index values to be removed
+    st.write(f"Debug: Index values to be removed: {rows_to_remove}")
+    
+    # Remove those rows from the original DataFrame if any such rows exist
+    if len(rows_to_remove) > 0:
+        df.drop(rows_to_remove, inplace=True)
+    
+    # Debug: Show the first few rows of df after attempting to remove rows
+    st.write("Debug: First few rows of df after attempting to remove rows:")
+    st.dataframe(df.head())
     
     # Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
     df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
