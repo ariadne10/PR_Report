@@ -23,6 +23,20 @@ if uploaded_file and uploaded_file2:
   
     # Create 'CONC' column
     df['CONC'] = df['Site Code'] + df['BU Name']
+    
+    # Reorder columns to place 'CONC' after 'BU Name'
+    cols = df.columns.tolist()
+    cols.remove('CONC')
+    target_idx = cols.index('BU Name') + 1
+    cols = cols[:target_idx] + ['CONC'] + cols[target_idx:]
+    df = df[cols]
+  
+    # Reorder columns to place 'Date Release' to the right of 'Supply Source'
+    cols = df.columns.tolist()
+    cols.remove('Date Release')
+    target_idx = cols.index('Supply Source') + 1
+    cols = cols[:target_idx] + ['Date Release'] + cols[target_idx:]
+    df = df[cols]
 
     # Debug: Show column names to the user to debug
     st.write(f"Debug: Column names in the main file: {df.columns.tolist()}")
