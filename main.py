@@ -35,21 +35,26 @@ if uploaded_file and uploaded_file2:
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
 
-     # New requirements
+   # New requirements
 
-    # First, create a filtered DataFrame based on 'BU Name' and 'Part Description'
-    filtered_df = df[(df['BU Name'] == 'Crestron') & df['Part Description'].str.contains("PROG", na=False)]
+# First, create a filtered DataFrame based on 'BU Name' and 'Part Description'
+filtered_df = df[(df['BU Name'] == 'Crestron') & df['Part Description'].str.contains("PROG", na=False)]
 
-    # Identify rows in the filtered DataFrame that have "(" in 'Mfr Part Code'
-    rows_to_remove = filtered_df[filtered_df['Mfr Part Code'].str.contains(r"\(", regex=True, na=False)].index
+# Debug: Show the filtered DataFrame
+st.write(f"Debug: Filtered DataFrame based on 'BU Name' and 'Part Description': {filtered_df}")
 
-    # Remove those rows from the original DataFrame if any such rows exist
+# Identify rows in the filtered DataFrame that have "(" in 'Mfr Part Code'
+rows_to_remove = filtered_df[filtered_df['Mfr Part Code'].str.contains(r"\(", regex=True, na=False)].index
+
+# Debug: Show the index values to be removed
+st.write(f"Debug: Index values to be removed: {rows_to_remove}")
+
+# Remove those rows from the original DataFrame if any such rows exist
 if len(rows_to_remove) > 0:
     df.drop(rows_to_remove, inplace=True)
 
-    # Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
-    df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
-
+# Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
+df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
     # Additional data cleansing
     df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
