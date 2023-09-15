@@ -38,8 +38,12 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
     df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
 
-    # Get values to be removed
+# Check if 'CONC' exists in df before attempting to filter
+if 'CONC' in df.columns:
     remove_values = df2['CONC'][df2['Action'] == '** Remove **']
+    df = df[~df['CONC'].isin(remove_values)]
+else:
+    st.write(f"Warning: 'CONC' column not found in the main file. Skipping removal step.")
 
     # Remove rows where 'CONC' value is in remove_values
     df = df[~df['CONC'].isin(remove_values)]
