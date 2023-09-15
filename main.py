@@ -35,12 +35,12 @@ if uploaded_file and uploaded_file2:
     columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
     df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
 
-    # New requirements
-    # Remove rows where 'BU Name' is "Crestron", 'Part Description' contains "PROG",
-    # and 'Mfr Part Code' contains "("
-    df = df[~((df['BU Name'] == 'Crestron') 
-              & df['Part Description'].str.contains("PROG", na=False)
-              & df['Mfr Part Code'].str.contains("(", na=False))]
+# New requirements
+# Remove rows where 'BU Name' is "Crestron", 'Part Description' contains "PROG",
+# and 'Mfr Part Code' contains "("
+df = df[~((df['BU Name'] == 'Crestron') 
+          & df['Part Description'].str.contains("PROG", na=False)
+          & df['Mfr Part Code'].str.contains(r"\(", na=False))]
 
     # Remove rows where 'Manufacturer' is "A & J PROGRAMMING" or "MEXSER"
     df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
