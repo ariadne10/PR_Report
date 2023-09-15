@@ -86,4 +86,16 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['Difference', '20%'], inplace=True)
     df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
 
+    # Remove "Part Description" column
+    df.drop(columns=['Part Description'], errors='ignore', inplace=True)
+
+    # Remove rows where "BU Name" is "EMERSON" or "EMERSONPM" and "Manufacturer" is "ISSI"
+    rows_to_remove = df[
+        (df['BU Name'].isin(['EMERSON', 'EMERSONPM'])) 
+        & (df['Manufacturer'] == 'ISSI')
+    ].index
+
+    if len(rows_to_remove) > 0:
+        df.drop(rows_to_remove, inplace=True)
+
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
