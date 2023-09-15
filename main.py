@@ -51,7 +51,7 @@ if len(rows_to_remove) > 0:
 df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
 
     # Additional data cleansing
-    df = df[df['Part Profit Center Profit Center'] != 'PAAS']
+df = df[df['Part Profit Center Profit Center'] != 'PAAS']
     df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
     df = df[df['Value'] != '06-LE/FC-N']
 
