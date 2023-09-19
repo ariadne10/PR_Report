@@ -176,7 +176,7 @@ if uploaded_file and uploaded_file2:
     rows_to_remove_hp = df[
         (df['BU Name'] == 'HP') 
         & (df['Site Code'].str.contains('CN02', case=False, na=False))
-        & (df['Commodity'].isin(['MEMVOL', 'MEMNOVOL']))
+        & (df['Commodity'].isin(['MEMVOL', 'MEMNONVOL']))
     ].index
     
     # Debug: Show index values to be removed for HP case
