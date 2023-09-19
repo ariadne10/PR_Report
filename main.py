@@ -111,5 +111,49 @@ if uploaded_file and uploaded_file2:
 
      # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
-    
+
+        # Debug: Show unique values in the 'BU Name' and 'Manufacturer' columns
+    st.write(f"Debug: Unique values in 'BU Name': {df['BU Name'].unique()}")
+    st.write(f"Debug: Unique values in 'Manufacturer': {df['Manufacturer'].unique()}")
+
+    # Remove rows where "BU Name" is "CADENCE" and "Manufacturer" is "TEXAS INSTRUMENT"
+    rows_to_remove_cadence = df[
+        (df['BU Name'] == 'CADENCE') 
+        & (df['Manufacturer'] == 'TEXAS INSTRUMENT')
+    ].index
+
+    if len(rows_to_remove_cadence) > 0:
+        df.drop(rows_to_remove_cadence, inplace=True)
+
+    # Remove rows where "BU Name" is "GIGAMON" and "Manufacturer" is "BROADCOM"
+    rows_to_remove_gigamon = df[
+        (df['BU Name'] == 'GIGAMON') 
+        & (df['Manufacturer'] == 'BROADCOM')
+    ].index
+
+    if len(rows_to_remove_gigamon) > 0:
+        df.drop(rows_to_remove_gigamon, inplace=True)
+
+    # Remove rows where "Part Number" starts with "FB"
+    rows_to_remove_fb = df[df['Part Number'].str.startswith('FB', na=False)].index
+
+    if len(rows_to_remove_fb) > 0:
+        df.drop(rows_to_remove_fb, inplace=True)
+
+    # Remove rows where "BU Name" is "ARISTA" and "Part Number" contains 'B'
+    rows_to_remove_arista = df[
+        (df['BU Name'] == 'ARISTA') 
+        & df['Part Number'].str.contains('B', na=False)
+    ].index
+
+    if len(rows_to_remove_arista) > 0:
+        df.drop(rows_to_remove_arista, inplace=True)
+
+    # Debug: Show the number of rows removed for each condition
+    st.write(f"Debug: Number of rows removed for CADENCE and TEXAS INSTRUMENT: {len(rows_to_remove_cadence)}")
+    st.write(f"Debug: Number of rows removed for GIGAMON and BROADCOM: {len(rows_to_remove_gigamon)}")
+    st.write(f"Debug: Number of rows removed for Part Number starting with FB: {len(rows_to_remove_fb)}")
+    st.write(f"Debug: Number of rows removed for ARISTA and Part Number containing B: {len(rows_to_remove_arista)}")
+
+    # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
