@@ -156,6 +156,9 @@ if uploaded_file and uploaded_file2:
     st.write(f"Debug: Number of rows removed for ARISTA and Part Number containing B: {len(rows_to_remove_arista)}")
 
     st.write(f"Debug: Available columns in the DataFrame: {df.columns.tolist()}")
-  
+
+    # Debug: Print available columns right after reading the Excel file
+    st.write(f"Debug: Available columns right after reading Excel: {df.columns.tolist()}")
+    
     # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
