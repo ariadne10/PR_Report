@@ -189,5 +189,18 @@ if uploaded_file and uploaded_file2:
     # Debug: Show the number of rows removed for HP case
     st.write(f"Debug: Number of rows removed for HP: {len(rows_to_remove_hp)}")
 
+    # Remove rows where "BU Name" is "APBU" and "Commodity" is "SOLID STATE DRIVE"
+rows_to_remove_apbu = df[
+    (df['BU Name'] == 'APBU') 
+    & (df['Commodity'] == 'SOLID STATE DRIVE')
+].index
+
+    # Debug: Show the number of rows to be removed for this condition
+    st.write(f"Debug: Number of rows to be removed for APBU and SOLID STATE DRIVE: {len(rows_to_remove_apbu)}")
+
+if len(rows_to_remove_apbu) > 0:
+    df.drop(rows_to_remove_apbu, inplace=True)
+
+
     # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
