@@ -196,7 +196,7 @@ rows_to_remove_apbu = df[
 ].index
 
     # Debug: Show the number of rows to be removed for this condition
-    st.write(f"Debug: Number of rows to be removed for APBU and SOLID STATE DRIVE: {len(rows_to_remove_apbu)}")
+st.write(f"Debug: Number of rows to be removed for APBU and SOLID STATE DRIVE: {len(rows_to_remove_apbu)}")
 
 if len(rows_to_remove_apbu) > 0:
     df.drop(rows_to_remove_apbu, inplace=True)
