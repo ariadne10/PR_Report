@@ -161,7 +161,7 @@ if uploaded_file and uploaded_file2:
     st.write(f"Debug: Available columns right after reading Excel: {df.columns.tolist()}")
 
     # Additional Filtering
-    remove_part_numbers = df2[df2['Eliminar de los PR Report'] == 'Remove']['Action Part Number'].tolist()
+    remove_part_numbers = df2[df2['Action Part Number'] == 'Remove']['Eliminar de los PR Report'].tolist()
     df = df[~df['Part Number'].isin(remove_part_numbers)]
 
     # Debug: Show the number of rows removed
