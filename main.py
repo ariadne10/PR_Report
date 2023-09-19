@@ -189,6 +189,9 @@ if uploaded_file and uploaded_file2:
     # Debug: Show the number of rows removed for HP case
     st.write(f"Debug: Number of rows removed for HP: {len(rows_to_remove_hp)}")
 
+    # Debug: Print available columns right before the issue
+st.write(f"Debug: Available columns right before the issue: {df.columns.tolist()}")
+
     # Remove rows where "BU Name" is "APBU" and "Commodity" is "SOLID STATE DRIVE"
 rows_to_remove_apbu = df[
     (df['BU Name'] == 'APBU') 
