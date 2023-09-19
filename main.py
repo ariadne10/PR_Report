@@ -18,9 +18,6 @@ if uploaded_file and uploaded_file2:
     df = pd.read_excel(uploaded_file, skiprows=1)
     df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
 
-    # Debug: Print available columns in main DataFrame
-    st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
-
     # Additional Data Cleansing Steps
     df['Site Code'] = df['Site Code'].str.replace('_', '')
     df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
@@ -38,6 +35,10 @@ if uploaded_file and uploaded_file2:
 
    # Debug: Print available columns in main DataFrame
     st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
+    st.write(f"Debug: Available columns in df2 DataFrame: {df2.columns.tolist()}")
+
+     # Debug: Show unique values in the 'Action Part Number' column of df2
+    st.write(f"Debug: Unique values in 'Action Part Number': {df2['Action Part Number'].unique()}")
 
     # Filter and remove rows based on 'BU Name', 'Part Description', and 'Mfr Part Code'
     df = df[~((df['BU Name'] == 'CRESTRON') 
@@ -162,10 +163,15 @@ if uploaded_file and uploaded_file2:
 
     # Additional Filtering
     remove_part_numbers = df2[df2['Action Part Number'] == 'Remove']['Eliminar de los PR Report'].tolist()
+
+    # Debug: Show part numbers to remove
+    st.write(f"Debug: Part numbers to remove: {remove_part_numbers}")
+
     df = df[~df['Part Number'].isin(remove_part_numbers)]
 
     # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed based on 'Eliminar de los PR Report': {len(remove_part_numbers)}")
+
 
     # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
