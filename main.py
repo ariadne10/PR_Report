@@ -172,6 +172,22 @@ if uploaded_file and uploaded_file2:
     # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed based on 'Eliminar de los PR Report': {len(remove_part_numbers)}")
 
+    # Additional Filtering based on 'BU Name', 'Site Code' and 'Commodity'
+    rows_to_remove_hp = df[
+        (df['BU Name'] == 'HP') 
+        & (df['Site Code'].str.contains('CN02', case=False, na=False))
+        & (df['Commodity'].isin(['MEMVOL', 'MEMNOVOL']))
+    ].index
+    
+    # Debug: Show index values to be removed for HP case
+    st.write(f"Debug: Index values to be removed for HP: {rows_to_remove_hp}")
+
+    # Remove rows if they exist in the DataFrame
+    if len(rows_to_remove_hp) > 0:
+        df.drop(rows_to_remove_hp, inplace=True)
+
+    # Debug: Show the number of rows removed for HP case
+    st.write(f"Debug: Number of rows removed for HP: {len(rows_to_remove_hp)}")
 
     # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
