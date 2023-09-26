@@ -217,5 +217,7 @@ st.write(f"Debug: Number of rows to be removed for NETAPP conditions: {len(rows_
 if len(rows_to_remove_netapp) > 0:
     df.drop(rows_to_remove_netapp, inplace=True)
 
+st.write(f"Debug: Available columns in df2 DataFrame: {df2.columns.tolist()}")
+ 
     # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
