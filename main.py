@@ -220,4 +220,4 @@ if len(rows_to_remove_netapp) > 0:
 st.write(f"Debug: Available columns in df2 DataFrame: {df2.columns.tolist()}")
  
     # Continue with the existing code to generate download link ...
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+st.markdown(get_table_download_link(df), unsafe_allow_html=True)
