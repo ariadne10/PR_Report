@@ -203,7 +203,19 @@ st.write(f"Debug: Number of rows to be removed for APBU and SOLID STATE DRIVE: {
 
 if len(rows_to_remove_apbu) > 0:
     df.drop(rows_to_remove_apbu, inplace=True)
+# Identify rows with the given conditions
 
+rows_to_remove_netapp = df[
+    df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
+    & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
+].index
+
+# Debug: Show the number of rows to be removed for this condition
+st.write(f"Debug: Number of rows to be removed for NETAPP conditions: {len(rows_to_remove_netapp)}")
+
+# Remove rows if they exist in the DataFrame
+if len(rows_to_remove_netapp) > 0:
+    df.drop(rows_to_remove_netapp, inplace=True)
 
     # Continue with the existing code to generate download link ...
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
