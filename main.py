@@ -9,7 +9,7 @@ def get_excel_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
     
     # Ensure the directory exists
-    directory = "/mnt/data/"
+    directory = "C:\Users\3659596\OneDrive - Jabil\Desktop\JABIL\S72\Reports\PR Report\Automation"
     if not os.path.exists(directory):
         os.makedirs(directory)
     
