@@ -20,10 +20,10 @@ def get_excel_download_link(df):
     # ... [rest of the function remains unchanged]
 
 def get_table_download_link(df):
-current_date = datetime.datetime.now().strftime('%m-%d-%y')
-csv = df.to_csv(index=False)
-b64 = base64.b64encode(csv.encode()).decode()
-href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
+    current_date = datetime.datetime.now().strftime('%m-%d-%y')
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
     
     return href
 
