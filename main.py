@@ -191,8 +191,8 @@ if len(rows_to_remove_cisco_part) > 0:
     
 # Remove rows where "BU Name" is one of ["NETAPP", "NETAPPCTO", "NETAPPFJ", "NETAPPSMT"] and "Commodity" is either "HDD" or "SOLID STATE DRIVE".
 rows_to_remove_netapp = df[
-    df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
-    & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
+df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
+& df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
 ].index
 
 if len(rows_to_remove_netapp) > 0:
