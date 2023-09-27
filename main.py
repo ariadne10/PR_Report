@@ -105,9 +105,6 @@ if uploaded_file and uploaded_file2:
     if len(rows_to_remove) > 0:
         df.drop(rows_to_remove, inplace=True)
 
-    if len(rows_to_remove) > 0:
-        df.drop(rows_to_remove, inplace=True)
-
      # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
     
