@@ -199,25 +199,21 @@ if uploaded_file and uploaded_file2:
     # Filtering based on specific conditions
 
 # Debugging steps:
-if 'df' in locals() or 'df' in globals():
-    st.write("DataFrame df exists.")
-else:
-    st.write("DataFrame df does not exist.")
-
-if 'df' in locals() or 'df' in globals():
+try:
     st.write(f"Columns in DataFrame df: {df.columns.tolist()}")
     st.write(f"Unique values in 'BU Name': {df['BU Name'].unique()}")
     st.write(f"Unique values in 'Manufacturer': {df['Manufacturer'].unique()}")
-else:
-    st.write("DataFrame df does not exist, skipping column checks.")
+    
+    # Now, the previous filtering condition:
+    rows_to_remove_cisco_intel = df[
+        (df['BU Name'] == 'CISCO') 
+        & (df['Manufacturer'] == 'INTEL')
+    ].index
+    if len(rows_to_remove_cisco_intel) > 0:
+        df.drop(rows_to_remove_cisco_intel, inplace=True)
 
-# Now, the previous filtering condition:
-rows_to_remove_cisco_intel = df[
-    (df['BU Name'] == 'CISCO') 
-    & (df['Manufacturer'] == 'INTEL')
-].index
-if len(rows_to_remove_cisco_intel) > 0:
-    df.drop(rows_to_remove_cisco_intel, inplace=True)
+except Exception as e:
+    st.write(f"An error occurred: {e}")
 
 # Remove rows where "BU Name" is "CISCO" and "Part Number" starts with "17-".
 rows_to_remove_cisco_part = df[
