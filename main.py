@@ -210,7 +210,7 @@ st.write(f"Debug: Available columns right before the issue: {df.columns.tolist()
 
 # Identify rows to be removed
 rows_to_remove_apbu = df[
-    (df['BU Name'] == 'APBU') 
+    df['BU Name'].isin(['APBU']) 
     & (df['Commodity'] == 'SOLID STATE DRIVE')
 ].index
 
