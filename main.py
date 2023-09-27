@@ -18,8 +18,7 @@ def get_excel_download_link(df):
     # Save DataFrame to Excel
     with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
         # ... [rest of the function remains unchanged]
-
-    def get_table_download_link(df):
+def get_table_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
