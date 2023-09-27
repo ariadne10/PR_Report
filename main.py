@@ -179,13 +179,12 @@ try:
 except Exception as e:
     st.write(f"An error occurred: {e}")
 
-# Remove rows where "BU Name" is "CISCO" and "Part Number" starts with "17-".
+if 'rows_to_remove_cisco_part' in locals() and len(rows_to_remove_cisco_part) > 0:
+
 rows_to_remove_cisco_part = df[
-    (df['BU Name'] == 'CISCO') 
-    & df['Part Number'].str.startswith('17-', na=False)
-].index
-if len(rows_to_remove_cisco_part) > 0:
-    df.drop(rows_to_remove_cisco_part, inplace=True)
+    (df['BU Name'] == "CISCO") & 
+    (df['Part Number'].str.startswith("17-"))
+]
 
 # Remove rows where "BU Name" is one of ["NETAPP", "NETAPPCTO", "NETAPPFJ", "NETAPPSMT"] and "Commodity" is either "HDD" or "SOLID STATE DRIVE".
 rows_to_remove_netapp = df[
