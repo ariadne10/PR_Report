@@ -193,7 +193,7 @@ if len(rows_to_remove_cisco_part) > 0:
 rows_to_remove_netapp = df[
     df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
     & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
-].index
+    ].index
 
 if len(rows_to_remove_netapp) > 0:
     df.drop(rows_to_remove_netapp, inplace=True)
