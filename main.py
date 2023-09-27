@@ -256,5 +256,51 @@ st.write(f"Debug: Number of rows to be removed for CISCO and Part Number startin
 if len(rows_to_remove_cisco_part) > 0:
     df.drop(rows_to_remove_cisco_part, inplace=True)
 
+# Remove specified columns
+columns_to_remove = ['Net OH', 'On Order', 'Priority']
+df.drop(columns=columns_to_remove, inplace=True, errors='ignore')
+
+# If you want to provide an Excel download link with font and column width adjustments:
+import openpyxl
+from openpyxl.styles import Font
+
+def get_excel_download_link(df):
+    current_date = datetime.datetime.now().strftime('%m-%d-%y')
+    
+    # Save DataFrame to Excel
+    with pd.ExcelWriter("/mnt/data/PPV_{}.xlsx".format(current_date), engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Sheet1")
+        
+        # Get the workbook and the sheet names
+        workbook  = writer.book
+        worksheet = workbook.active
+        
+        # Set the font and size for all cells
+        for row in worksheet.iter_rows():
+            for cell in row:
+                cell.font = Font(name='Calibri', size=8)
+        
+        # Adjust columns width
+        for column in worksheet.columns:
+            max_length = 0
+            column = [cell for cell in column]
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            worksheet.column_dimensions[column[0].column_letter].width = adjusted_width
+    
+    # Create download link
+    b64 = base64.b64encode(open("/mnt/data/PPV_{}.xlsx".format(current_date), "rb").read()).decode()
+    href = f'<a href="data:file/xlsx;base64,{b64}" download="PPV_{current_date}.xlsx">Download xlsx file</a>'
+    return href
+
+# Replace the CSV download link with Excel download link
+st.markdown(get_excel_download_link(df), unsafe_allow_html=True)
+
+
     # Continue with the existing code to generate download link ...
 st.markdown(get_table_download_link(df), unsafe_allow_html=True)
