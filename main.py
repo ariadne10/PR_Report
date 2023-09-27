@@ -218,6 +218,17 @@ if len(rows_to_remove_netapp) > 0:
     df.drop(rows_to_remove_netapp, inplace=True)
 
 st.write(f"Debug: Available columns in df2 DataFrame: {df2.columns.tolist()}")
+
+action_part_values = df2.get('Action Part Number')
+if action_part_values is not None:
+    st.write(f"Debug: Unique values in 'Action Part Number': {action_part_values.unique()}")
+else:
+    st.write("Column 'Action Part Number' not found in df2.")
+
+if 'Action Part Number' in df2.columns:
+    st.write(f"Debug: Unique values in 'Action Part Number': {df2['Action Part Number'].unique()}")
+else:
+    st.write("Column 'Action Part Number' not found in df2.")
  
     # Continue with the existing code to generate download link ...
 st.markdown(get_table_download_link(df), unsafe_allow_html=True)
