@@ -212,7 +212,10 @@ st.write("After displaying columns...")
     # Debug: Print available columns right before the issue
 st.write(f"Debug: Available columns right before the issue: {df.columns.tolist()}")
 
-df = df[~df['BU Name'].isin(['APBU'])]
+if 'BU Name' in df.columns:
+    df = df[~df['BU Name'].isin(['APBU'])]
+else:
+    st.write("Column 'BU Name' does not exist in the DataFrame.")
 
     # Debug: Show the number of rows to be removed for this condition
 st.write(f"Debug: Number of rows to be removed for APBU and SOLID STATE DRIVE: {len(rows_to_remove_apbu)}")
