@@ -183,7 +183,7 @@ except Exception as e:
 rows_to_remove_cisco_part = df[
     (df['BU Name'] == "CISCO") & 
     (df['Part Number'].str.startswith("17-"))
-]
+].index
 
 # Now check if it's non-empty
 if len(rows_to_remove_cisco_part) > 0:
