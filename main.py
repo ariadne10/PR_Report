@@ -196,6 +196,32 @@ if uploaded_file and uploaded_file2:
     # Debugging Information
     st.write(f"Debug: Number of rows removed for HP: {len(rows_to_remove_hp)}")
 
+    # Filtering based on specific conditions
+
+# 1. Remove rows where "BU Name" is "CISCO" and "Manufacturer" is "INTEL".
+rows_to_remove_cisco_intel = df[
+    (df['BU Name'] == 'CISCO') 
+    & (df['Manufacturer'] == 'INTEL')
+].index
+if len(rows_to_remove_cisco_intel) > 0:
+    df.drop(rows_to_remove_cisco_intel, inplace=True)
+
+# Remove rows where "BU Name" is "CISCO" and "Part Number" starts with "17-".
+rows_to_remove_cisco_part = df[
+    (df['BU Name'] == 'CISCO') 
+    & df['Part Number'].str.startswith('17-', na=False)
+].index
+if len(rows_to_remove_cisco_part) > 0:
+    df.drop(rows_to_remove_cisco_part, inplace=True)
+
+# Remove rows where "BU Name" is one of ["NETAPP", "NETAPPCTO", "NETAPPFJ", "NETAPPSMT"] and "Commodity" is either "HDD" or "SOLID STATE DRIVE".
+rows_to_remove_netapp = df[
+    df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
+    & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
+].index
+if len(rows_to_remove_netapp) > 0:
+    df.drop(rows_to_remove_netapp, inplace=True)
+
     # Display download links for Excel and CSV
     st.markdown(get_excel_download_link(df), unsafe_allow_html=True)
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
