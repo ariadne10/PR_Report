@@ -1,23 +1,19 @@
 import streamlit as st
 import pandas as pd
 import base64
-import datetime
-import openpyxl
-from openpyxl.styles import Font
 
-def get_table_download_link(df):
-    current_date = datetime.datetime.now().strftime('%m-%d-%y')
+# Utility function to generate a CSV download link
+def generate_csv_download_link(df, filename="data.csv"):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
+    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">Download CSV file</a>'
     return href
 
-uploaded_file = st.file_uploader("Choose the main Excel file", type="xlsx")
-uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", type="xlsx")
+# Main code
+uploaded_file = st.file_uploader("Choose a file")
 
-if uploaded_file and uploaded_file2:
-    df = pd.read_excel(uploaded_file, skiprows=1)
-    df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
+if uploaded_file:
+    df = pd.read_excel(uploaded_file, engine="openpyxl")
 
     # Data Cleansing for df
     df['Site Code'] = df['Site Code'].str.replace('_', '')
@@ -199,5 +195,6 @@ rows_to_remove_netapp = df[
 if len(rows_to_remove_netapp) > 0:
     df.drop(rows_to_remove_netapp, inplace=True)
 
-    # Display download links for Excel and CSV
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+    # Displaying the filtered DataFrame and providing a CSV download link
+    st.write(df)
+    st.markdown(generate_csv_download_link(df), unsafe_allow_html=True)
