@@ -8,12 +8,8 @@ import os
 def get_excel_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
     
-    # Ensure the directory exists
-    directory = "C:\\Users\\3659596\\OneDrive - Jabil\\Desktop\\JABIL\\S72\\Reports\\PR Report\\Automation"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    
-    file_path = os.path.join(directory, "PPV_{}.xlsx".format(current_date))
+    # Use the current working directory
+    file_path = "PPV_{}.xlsx".format(current_date)
     
     # Save DataFrame to Excel
     with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
