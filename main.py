@@ -200,5 +200,4 @@ if len(rows_to_remove_netapp) > 0:
     df.drop(rows_to_remove_netapp, inplace=True)
 
     # Display download links for Excel and CSV
-    st.markdown(get_excel_download_link(df), unsafe_allow_html=True)
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
