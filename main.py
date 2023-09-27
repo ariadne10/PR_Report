@@ -179,21 +179,25 @@ try:
 except Exception as e:
     st.write(f"An error occurred: {e}")
 
+# Define rows_to_remove_cisco_part first
 rows_to_remove_cisco_part = df[
     (df['BU Name'] == "CISCO") & 
     (df['Part Number'].str.startswith("17-"))
 ]
 
-if 'rows_to_remove_cisco_part' in locals() and len(rows_to_remove_cisco_part) > 0:
+# Now check if it's non-empty
+if len(rows_to_remove_cisco_part) > 0:
+    # Do something if necessary
 
 # Remove rows where "BU Name" is one of ["NETAPP", "NETAPPCTO", "NETAPPFJ", "NETAPPSMT"] and "Commodity" is either "HDD" or "SOLID STATE DRIVE".
 rows_to_remove_netapp = df[
     df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
     & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
 ].index
+
 if len(rows_to_remove_netapp) > 0:
     df.drop(rows_to_remove_netapp, inplace=True)
-
+    
     # Displaying the filtered DataFrame and providing a CSV download link
     st.write(df)
     st.markdown(generate_csv_download_link(df), unsafe_allow_html=True)
