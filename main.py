@@ -104,15 +104,6 @@ if uploaded_file and uploaded_file2:
 
     if len(rows_to_remove) > 0:
         df.drop(rows_to_remove, inplace=True)
-
-    # Remove rows where "BU Name" is one of ["NETAPP", "NETAPPCTO", "NETAPPFJ", "NETAPPSMT"] and "Commodity" is either "HDD" or "SOLID STATE DRIVE".
-rows_to_remove_netapp = df[
-    df['BU Name'].isin(['NETAPP', 'NETAPPCTO', 'NETAPPFJ', 'NETAPPSMT']) 
-    & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
-].index
-
-if len(rows_to_remove_netapp) > 0:
-    df.drop(rows_to_remove_netapp, inplace=True)
     
      # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
