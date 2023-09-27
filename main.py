@@ -205,6 +205,10 @@ if uploaded_file and uploaded_file2:
     # Debug: Show the number of rows removed for HP case
     st.write(f"Debug: Number of rows removed for HP: {len(rows_to_remove_hp)}")
 
+st.write("Before displaying columns...")
+st.write(f"Debug: Available columns right before the issue: {df.columns.tolist()}")
+st.write("After displaying columns...")
+
     # Debug: Print available columns right before the issue
 st.write(f"Debug: Available columns right before the issue: {df.columns.tolist()}")
 
