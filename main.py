@@ -102,6 +102,14 @@ if uploaded_file and uploaded_file2:
         & (df['Manufacturer'].str.contains('INTEGRATED SILICON SOLUTIONS \(ISSI\)', case=False, na=False))
     ].index
 
+    rows_to_remove_apbu = df[
+    (df['BU Name'] == 'APBU') 
+    & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
+].index
+
+if len(rows_to_remove_apbu) > 0:
+    df.drop(rows_to_remove_apbu, inplace=True)
+
     if len(rows_to_remove) > 0:
         df.drop(rows_to_remove, inplace=True)
     
