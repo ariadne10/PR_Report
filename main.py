@@ -3,6 +3,21 @@ import pandas as pd
 import base64
 import datetime
 import re
+import os
+
+def get_excel_download_link(df):
+    current_date = datetime.datetime.now().strftime('%m-%d-%y')
+    
+    # Ensure the directory exists
+    directory = "/mnt/data/"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    
+    file_path = os.path.join(directory, "PPV_{}.xlsx".format(current_date))
+    
+    # Save DataFrame to Excel
+    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        # ... [rest of the function remains unchanged]
 
 def get_table_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
