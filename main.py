@@ -5,38 +5,6 @@ import datetime
 import openpyxl
 from openpyxl.styles import Font
 
-def get_excel_download_link(df):
-    current_date = datetime.datetime.now().strftime('%m-%d-%y')
-    
-    # Save DataFrame to Excel with styling
-    file_path = "/mnt/data/PPV_{}.xlsx".format(current_date)
-    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name="Sheet1")
-        
-        # Styling the Excel output
-        workbook  = writer.book
-        worksheet = workbook.active
-        for row in worksheet.iter_rows():
-            for cell in row:
-                cell.font = Font(name='Calibri', size=8)
-        
-        for column in worksheet.columns:
-            max_length = 0
-            column = [cell for cell in column]
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(cell.value)
-                except:
-                    pass
-            adjusted_width = (max_length + 2)
-            worksheet.column_dimensions[column[0].column_letter].width = adjusted_width
-    
-    with open(file_path, "rb") as file:
-        b64 = base64.b64encode(file.read()).decode()
-    href = f'<a href="data:file/xlsx;base64,{b64}" download="PPV_{current_date}.xlsx">Download xlsx file</a>'
-    return href
-
 def get_table_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
     csv = df.to_csv(index=False)
