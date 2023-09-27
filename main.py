@@ -229,6 +229,32 @@ if 'Action Part Number' in df2.columns:
     st.write(f"Debug: Unique values in 'Action Part Number': {df2['Action Part Number'].unique()}")
 else:
     st.write("Column 'Action Part Number' not found in df2.")
- 
+
+# Identify rows with CISCO in BU Name and INTEL in Manufacturer
+rows_to_remove_cisco_intel = df[
+    (df['BU Name'] == 'CISCO') 
+    & (df['Manufacturer'] == 'INTEL')
+].index
+
+# Debug: Show the number of rows to be removed for this condition
+st.write(f"Debug: Number of rows to be removed for CISCO and INTEL conditions: {len(rows_to_remove_cisco_intel)}")
+
+# Remove rows if they exist in the DataFrame
+if len(rows_to_remove_cisco_intel) > 0:
+    df.drop(rows_to_remove_cisco_intel, inplace=True)
+
+# Identify rows with CISCO in BU Name and Part Number starting with 17-
+rows_to_remove_cisco_part = df[
+    (df['BU Name'] == 'CISCO') 
+    & df['Part Number'].str.startswith('17-', na=False)
+].index
+
+# Debug: Show the number of rows to be removed for this condition
+st.write(f"Debug: Number of rows to be removed for CISCO and Part Number starting with 17-: {len(rows_to_remove_cisco_part)}")
+
+# Remove rows if they exist in the DataFrame
+if len(rows_to_remove_cisco_part) > 0:
+    df.drop(rows_to_remove_cisco_part, inplace=True)
+
     # Continue with the existing code to generate download link ...
 st.markdown(get_table_download_link(df), unsafe_allow_html=True)
