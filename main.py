@@ -137,10 +137,10 @@ if uploaded_file and uploaded_file2:
     st.write(f"Debug: Unique values in 'BU Name': {df['BU Name'].unique()}")
     st.write(f"Debug: Unique values in 'Manufacturer': {df['Manufacturer'].unique()}")
 
-    # Remove rows where "BU Name" is "CADENCE" and "Manufacturer" is "TEXAS INSTRUMENT"
+    # Remove rows where "BU Name" is "CADENCE" and "Manufacturer" is "TEXAS INSTRUMENTS"
     rows_to_remove_cadence = df[
         (df['BU Name'] == 'CADENCE') 
-        & (df['Manufacturer'] == 'TEXAS INSTRUMENT')
+        & (df['Manufacturer'] == 'TEXAS INSTRUMENTS')
     ].index
 
     if len(rows_to_remove_cadence) > 0:
