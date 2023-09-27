@@ -208,11 +208,14 @@ if uploaded_file and uploaded_file2:
     # Debug: Print available columns right before the issue
 st.write(f"Debug: Available columns right before the issue: {df.columns.tolist()}")
 
-    # Remove rows where "BU Name" is "APBU" and "Commodity" is "SOLID STATE DRIVE"
+# Identify rows to be removed
 rows_to_remove_apbu = df[
     (df['BU Name'] == 'APBU') 
     & (df['Commodity'] == 'SOLID STATE DRIVE')
 ].index
+
+# Remove these rows from the DataFrame
+df.drop(rows_to_remove_apbu, inplace=True)
 
     # Debug: Show the number of rows to be removed for this condition
 st.write(f"Debug: Number of rows to be removed for APBU and SOLID STATE DRIVE: {len(rows_to_remove_apbu)}")
