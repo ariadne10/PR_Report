@@ -17,6 +17,12 @@ def get_excel_download_link(df):
     
     # Save DataFrame to Excel
     with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Sheet1")
+        
+    # Create download link
+    b64 = base64.b64encode(open(file_path, "rb").read()).decode()
+    href = f'<a href="data:file/xlsx;base64,{b64}" download="PPV_{current_date}.xlsx">Download xlsx file</a>'
+    return href
 
 def get_table_download_link(df):
     current_date = datetime.datetime.now().strftime('%m-%d-%y')
