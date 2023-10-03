@@ -111,6 +111,9 @@ if uploaded_file and uploaded_file2:
         (df['BU Name'] == 'APBU') 
         & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
     ].index
+
+    # Debug: Print the contents of rows_to_remove_apbu
+    st.write(f"Debug: rows_to_remove_apbu: {rows_to_remove_apbu}")
     
     if len(rows_to_remove_apbu) > 0:
         df.drop(rows_to_remove_apbu, inplace=True)
