@@ -114,7 +114,7 @@ if len(rows_to_remove_apbu) > 0:
     df.drop(rows_to_remove_apbu, inplace=True)
 
     if 'rows_to_remove_apbu' in locals() and len(rows_to_remove_apbu) > 0:
-    df.drop(rows_to_remove_apbu, inplace=True)
+df.drop(rows_to_remove_apbu, inplace=True)
 
      # Debug: Show the number of rows removed
     st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
