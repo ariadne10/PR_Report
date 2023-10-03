@@ -21,6 +21,8 @@ if uploaded_file and uploaded_file2:
     # Debug: Print available columns in main DataFrame
     st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
 
+    rows_to_remove_apbu = []  # Initialize as an empty list
+
     # Additional Data Cleansing Steps
     df['Site Code'] = df['Site Code'].str.replace('_', '')
     df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
