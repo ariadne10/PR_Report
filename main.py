@@ -109,11 +109,21 @@ if uploaded_file and uploaded_file2:
         & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
     ].index
 
-    # Debug: Print the contents of rows_to_remove_apbu
-    st.write(f"Debug: rows_to_remove_apbu: {rows_to_remove_apbu}")
+  # Debug: Print the contents of rows_to_remove_apbu
+st.write(f"Debug: rows_to_remove_apbu: {rows_to_remove_apbu}")
+
+if len(rows_to_remove_apbu) > 0:
+    # Check if the indices exist in the DataFrame before dropping
+    valid_indices_to_remove = [idx for idx in rows_to_remove_apbu if idx in df.index]
     
-    if len(rows_to_remove_apbu) > 0:
-        df.drop(rows_to_remove_apbu, inplace=True)
+    if valid_indices_to_remove:
+        df.drop(valid_indices_to_remove, inplace=True)
+        st.write(f"Debug: Number of rows removed: {len(valid_indices_to_remove)}")
+    else:
+        st.write("Debug: No valid indices found in the DataFrame to remove.")
+else:
+    st.write("Debug: No rows to remove.")
+
 
     if 'rows_to_remove_apbu' in locals() and len(rows_to_remove_apbu) > 0:
         df.drop(rows_to_remove_apbu, inplace=True)
