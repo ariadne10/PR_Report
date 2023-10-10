@@ -21,8 +21,6 @@ if uploaded_file and uploaded_file2:
     # Debug: Print available columns in main DataFrame
     st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
 
-    rows_to_remove_apbu = []  # Initialize as an empty list
-
     # Additional Data Cleansing Steps
     df['Site Code'] = df['Site Code'].str.replace('_', '')
     df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
@@ -88,47 +86,4 @@ if uploaded_file and uploaded_file2:
     df.drop(columns=['Difference', '20%'], inplace=True)
     df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
 
-    # Remove "Part Description" column
-    df.drop(columns=['Part Description'], errors='ignore', inplace=True)
-
-   # Debug: Show unique values in the 'BU Name' and 'Manufacturer' columns
-    st.write(f"Debug: Unique values in 'BU Name': {df['BU Name'].unique()}")
-    st.write(f"Debug: Unique values in 'Manufacturer': {df['Manufacturer'].unique()}")
-
-    # Remove rows where "BU Name" is "EMERSON" or "EMERSONPM" and "Manufacturer" is "INTEGRATED SILICON SOLUTIONS (ISSI)"
-    rows_to_remove = df[
-        (df['BU Name'].isin(['EMERSON', 'EMERSONPM'])) 
-        & (df['Manufacturer'].str.contains('INTEGRATED SILICON SOLUTIONS \(ISSI\)', case=False, na=False))
-    ].index
-
-    if len(rows_to_remove) > 0:
-        df.drop(rows_to_remove, inplace=True)
-    
-    rows_to_remove_apbu = df[
-        (df['BU Name'] == 'APBU') 
-        & df['Commodity'].isin(['HDD', 'SOLID STATE DRIVE'])
-    ].index
-
-    # Debug: Print the contents of rows_to_remove_apbu
-        st.write(f"Debug: rows_to_remove_apbu: {rows_to_remove_apbu}")
-
-    if len(rows_to_remove_apbu) > 0:
-        # Check if the indices exist in the DataFrame before dropping
-        valid_indices_to_remove = [idx for idx in rows_to_remove_apbu if idx in df.index]
-    
-    if valid_indices_to_remove:
-        df.drop(valid_indices_to_remove, inplace=True)
-        st.write(f"Debug: Number of rows removed: {len(valid_indices_to_remove)}")
-    else:
-        st.write("Debug: No valid indices found in the DataFrame to remove.")
-    else:
-        st.write("Debug: No rows to remove.")
-
-
-    if 'rows_to_remove_apbu' in locals() and len(rows_to_remove_apbu) > 0:
-        df.drop(rows_to_remove_apbu, inplace=True)
-
-     # Debug: Show the number of rows removed
-    st.write(f"Debug: Number of rows removed: {len(rows_to_remove)}")
-    
     st.markdown(get_table_download_link(df), unsafe_allow_html=True)
