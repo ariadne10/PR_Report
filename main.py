@@ -23,8 +23,8 @@ else:
     st.write("Please upload the required Excel files.")
 
 # File paths
-path_to_excel1 = '/Users/3590080/OneDrive - Jabil/PR Report/Rep - Var 1.xlsx'
-path_to_excel2 = '/Users/3590080/OneDrive - Jabil/PR Report/S72 Sites and PICs.xlsx'
+path_to_excel1 = 'C:\Users\3659596\OneDrive - Jabil\Desktop\JABIL\S72\Reports\PR Report\Automation\Rep - Var 1 Practice Sheet (Brand new).xlsx'
+path_to_excel2 = 'C:\Users\3659596\OneDrive - Jabil\Desktop\JABIL\S72\Reports\PR Report\Sites & PICs\S72 Sites and PICs.xlsx'
 sheet_name = 'Sites VLkp'
 
 # Read Excel files
