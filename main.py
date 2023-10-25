@@ -11,7 +11,7 @@ uploaded_file2 = st.file_uploader("Upload Excel File 2 (S72 Sites and PICs)", ty
 if uploaded_file1 and uploaded_file2:
     # Read the uploaded Excel files
     df1 = pd.read_excel(uploaded_file1)
-    df2 = pd.read_excel(uploaded_file2, sheet_name=sheet_name)
+    df2 = pd.read_excel(uploaded_file2, sheet_name=Sites VLkp)
     
     # Rest of your data cleaning and processing code
 
