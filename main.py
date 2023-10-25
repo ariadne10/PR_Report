@@ -51,7 +51,7 @@ df1['Concat'] = df1['Site Code'] + df1['BU Name']
 df1 = df1[~((df1['Concat'].isin(df2['CONC'])) & (df2['Action BU'] == "** Remove **"))]
 
 # Add missing values from df1 to df2
-df2 = pd.concat([df2, df1[['Site Code', 'BU Name']])
+df2 = pd.concat([df2, df1[['Site Code', 'BU Name']]])
 
 # Data filtering based on conditions
 df1 = df1[~(df1['Part Number'].isin(df2['Delete']))]
