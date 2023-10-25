@@ -1,89 +1,104 @@
-import streamlit as st
 import pandas as pd
-import base64
-import datetime
-import re
 
-def get_table_download_link(df):
-    current_date = datetime.datetime.now().strftime('%m-%d-%y')
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="PPV_{current_date}.csv">Download csv file</a>'
-    return href
+# File paths
+path_to_excel1 = '/Users/3590080/OneDrive - Jabil/PR Report/Rep - Var 1.xlsx'
+path_to_excel2 = '/Users/3590080/OneDrive - Jabil/PR Report/S72 Sites and PICs.xlsx'
+sheet_name = 'Sites VLkp'
 
-uploaded_file = st.file_uploader("Choose the main Excel file", type="xlsx")
-uploaded_file2 = st.file_uploader("Choose the 'S72 Sites and PICs' Excel file", type="xlsx")
+# Read Excel files
+df1 = pd.read_excel(path_to_excel1)
+df2 = pd.read_excel(path_to_excel2, sheet_name=sheet_name)
 
-if uploaded_file and uploaded_file2:
-    df = pd.read_excel(uploaded_file, skiprows=1)
-    df2 = pd.read_excel(uploaded_file2, sheet_name='Sites VLkp')
+# Data cleaning and transformation steps
 
-    # Debug: Print available columns in main DataFrame
-    st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
+# Remove unnecessary columns
+columns_to_remove = [
+    "Total Nettable On Hand", "Buyer Name", "Global Name", "Supplier Name",
+    "Priority", "Action", "Part Type", "Part Profit Center Profit Center", "Supply Source", "Value"
+]
+df1 = df1.drop(columns=columns_to_remove)
 
-    # Additional Data Cleansing Steps
-    df['Site Code'] = df['Site Code'].str.replace('_', '')
-    df.drop(columns=['Priority', 'Part Type'], errors='ignore', inplace=True)
+# Remove rows where "paas" is in "Part Profit Center Profit Center"
+df1 = df1[~df1['Part Profit Center Profit Center'].str.contains("paas", case=False)]
 
-    # Create 'CONC' column
-    df['CONC'] = df['Site Code'] + df['BU Name']
+# Remove rows with specific conditions
+df1 = df1[~((df1['Des'] == "Sched Agrmt") & (df1['Value'] == "06-LE/FC-N"))]
+df1 = df1[df1['Supply Source'] != "SubstituteSupply"]
 
-    # Remove rows based on 'S72 Sites and PICs' file
-    remove_values = df2[df2['Action.1'] == '** Remove **']['CONC'].tolist()
-    df = df[~df['CONC'].isin(remove_values)]
+# Clean and transform the "Des" column
+df1['Des'] = df1['Des'].apply(lambda x: "PlannedOrder" if ("Firm Planned Order" in x or pd.isna(x)) else x)
 
-    # More data cleansing steps
-    columns_to_remove = ['Buyer Name', 'Global Name', 'Supplier Name', 'Total Nettable On Hand', 'Net Req']
-    df.drop(columns=columns_to_remove, errors='ignore', inplace=True)
+# Calculate the "T-N" column
+df1['T-N'] = df1['Total Dmnd'] - df1['Net OH']
 
-   # Debug: Print available columns in main DataFrame
-    st.write(f"Debug: Available columns in main DataFrame: {df.columns.tolist()}")
+# Calculate the "500" column
+df1['500'] = df1['T-N'] * df1['Target Price']
 
-    # Filter and remove rows based on 'BU Name', 'Part Description', and 'Mfr Part Code'
-    df = df[~((df['BU Name'] == 'CRESTRON') 
-              & df['Part Description'].str.contains("PROG", na=False) 
-              & df['Mfr Part Code'].str.contains(r'\([^)]*\)', regex=True, na=False))]
+# Remove rows where "500" is less than 500
+df1 = df1[df1['500'] >= 500]
 
-    # Debug: Print the first few rows of the DataFrame after filtering
-    st.write(f"Debug: First few rows of the filtered DataFrame based on 'BU Name' and 'Part Description':")
-    st.write(df.head())
+# Update "PR Qty" and "Boolean" columns based on conditions
+df1['Boolean'] = df1['T-N'] >= df1['PR Qty']
+df1['Boolean'] = df1['Boolean'].fillna(False)
 
-    # Remove rows if 'A & J PROGRAMMING' or 'MEXSER' is present under 'Manufacturer' column
-    df = df[~df['Manufacturer'].isin(['A & J PROGRAMMING', 'MEXSER'])]
-    
-    # Additional data cleansing
-    df = df[df['Part Profit Center Profit Center'] != 'PAAS']
-    df.drop(columns=['Part Profit Center Profit Center'], errors='ignore', inplace=True)
-    df = df[df['Value'] != '06-LE/FC-N']
+# Remove the '_' from the prefix of values in the "Site Code" column
+df1['Site Code'] = df1['Site Code'].str.lstrip('_')
 
-    # Additional cleansing
-    df.loc[df['Des'] == 'Purch Req', 'Supply Source'] = 'Purch Req'
-    df.loc[df['Des'] == 'Sched Agrmt', 'Supply Source'] = 'Sched Agrmt'
-    df.loc[df['Des'] == 'Firm Planned Order', 'Supply Source'] = 'PlannedOrder'
-    df = df[df['Supply Source'] != 'SubstituteSupply']
-    df.drop(columns=['Des', 'Value', 'Action', 'Indep Dmnd'], errors='ignore', inplace=True)
+# Create a new "Concat" column by concatenating "Site Code" and "BU Name"
+df1['Concat'] = df1['Site Code'] + df1['BU Name']
 
-    # Convert to datetime and create new columns
-    df = df.loc[pd.to_datetime(df['Date Release'], errors='coerce').notna()]
-    df['Date Release'] = pd.to_datetime(df['Date Release'])
-    df['Date Release1'] = df['Date Release'] - pd.to_timedelta(df['GRPT'], unit='D')
-    df.drop(columns=['GRPT', 'Date Release'], errors='ignore', inplace=True)
-    df.rename(columns={'Date Release1': 'Date Release'}, inplace=True)
-    
-    # Additional calculations
-    df['1'] = df['Total Dmnd'] - df['Net OH']
-    df['2'] = df['1'] >= df['PR Qty']
-    df['3'] = df['1'] * df['Std Price']
+# Data merging and filtering
+df1 = df1[~((df1['Concat'].isin(df2['CONC'])) & (df2['Action BU'] == "** Remove **"))]
 
-    # Finalize the DataFrame
-    df = df[df['3'] >= 500]
-    df.loc[df['2'] == False, 'PR Qty'] = df['1']
+# Add missing values from df1 to df2
+df2 = pd.concat([df2, df1[['Site Code', 'BU Name']])
 
-    # Create and remove temporary columns
-    df['20%'] = df['Std Price'] * 0.2
-    df['Difference'] = df['Std Price'] - df['20%']
-    df['Std Price'] = df['Difference']
-    df.drop(columns=['Difference', '20%'], inplace=True)
-    df.rename(columns={'Std Price': 'Target Price'}, inplace=True)
+# Data filtering based on conditions
+df1 = df1[~(df1['Part Number'].isin(df2['Delete']))]
 
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+# More data filtering based on conditions
+df1 = df1[~((df1['BU Name'] == "CRESTRON") & (df1['Part Description'].str.contains("PROG")) & (df1['Mfr Part Code'].str.contains("(")))]
+df1 = df1[~(df1['Manufacturer'].isin(["A & J PROGRAMMING", "MEXSER"]))]
+
+# Drop "Part Description" column
+df1 = df1.drop(columns=["Part Description"])
+
+# More data filtering based on conditions
+df1 = df1[~((df1['BU Name'] == "EMERSON") & (df1['Manufacturer'] == "ISSI"))]
+df1 = df1[~((df1['BU Name'] == "EMERSONPM") & (df1['Manufacturer'] == "ISSI"))]
+df1 = df1[~((df1['BU Name'] == "CADENCE") & (df1['Manufacturer'] == "TEXAS INSTRUMENTS"))]
+df1 = df1[~((df1['BU Name'] == "GIGAMON") & (df1['Manufacturer'] == "BROADCOM"))]
+df1 = df1[~(df1['Part Number'].str.startswith("FB"))]
+df1 = df1[~((df1['BU Name'] == "ARISTA") & df1['Part Number'].str.endswith("B"))]
+df1 = df1[~((df1['BU Name'].str.contains("HP")) & (df1['Site Code'] == "CN02") & ((df1['Commodity'] == "MEMNONVOL") | (df1['Commodity'] == "MEMVOL")))]
+df1 = df1[~((df1['BU Name'] == "APBU") & (df1['Commodity'] == "SOLID STATE DRIVES"))]
+df1 = df1[~((df1['BU Name'].str.contains("NETAPP")) & ((df1['Commodity'] == "HDD") | (df1['Commodity'] == "SOLID STATE DRIVES")))]
+df1 = df1[~((df1['BU Name'].str.contains("CISCO")) & (df1['Manufacturer'] == "INTEL"))]
+df1 = df1[~((df1['BU Name'].str.contains("CISCO")) & (df1['Part Number'].str.startswith("17-")))]
+df1 = df1[~(df1['Site Code'] == "MX16")]
+df1 = df1[~((df1['BU Name'] == "ADVANTEST") & (df1['Part Number'].str.contains("PP|EP")))]
+
+# Apply formatting to specific columns
+format_columns = ["Commodity", "Part Number"]
+df1[format_columns] = df1[format_columns].style.set_properties(**{'background-color': 'orange'})
+
+# Drop unnecessary columns
+df1 = df1.drop(columns=["Net OH", "On Order"])
+
+# Merge "Region" and "Site Name" columns based on matching "Site Code"
+df1 = df1.merge(df2[['Site Code', 'Region', 'Site Name']], on="Site Code", how="left")
+
+# Set font to Calibri size 8
+# Note: This formatting is for display purposes only and won't be saved in the output file
+df1 = df1.style.set_properties(**{'font-size': '8pt', 'font-family': 'Calibri'})
+
+# Save the cleaned data as Internal file
+# Note: You'll need to specify the desired file format and path for saving the file
+# Example: df1.to_excel("internal_file.xlsx", index=False)
+
+# Drop unnecessary columns for External file
+df1 = df1.drop(columns=["Region", "BU Name", "Site Name", "Part Number"])
+
+# Save the cleaned data as External file
+# Note: You'll need to specify the desired file format and path for saving the file
+# Example: df1.to_excel("external_file.xlsx", index=False)
