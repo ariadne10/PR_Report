@@ -5,7 +5,7 @@ import streamlit as st
 st.title("Data Cleaning App")
 
 # Upload Excel files
-uploaded_file1 = st.file_uploader("Upload Excel File 1 (Rep - Var 1)", type=["xlsx"])
+uploaded_file1 = st.file_uploader("Upload Excel File 1 (Rep - Var 1 Practice Sheet (Brand new))", type=["xlsx"])
 uploaded_file2 = st.file_uploader("Upload Excel File 2 (S72 Sites and PICs)", type=["xlsx"])
 
 if uploaded_file1 and uploaded_file2:
