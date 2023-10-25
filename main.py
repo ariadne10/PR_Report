@@ -1,4 +1,26 @@
 import pandas as pd
+import streamlit as st
+
+# Streamlit app
+st.title("Data Cleaning App")
+
+# Upload Excel files
+uploaded_file1 = st.file_uploader("Upload Excel File 1 (Rep - Var 1)", type=["xlsx"])
+uploaded_file2 = st.file_uploader("Upload Excel File 2 (S72 Sites and PICs)", type=["xlsx"])
+
+if uploaded_file1 and uploaded_file2:
+    # Read the uploaded Excel files
+    df1 = pd.read_excel(uploaded_file1)
+    df2 = pd.read_excel(uploaded_file2, sheet_name=sheet_name)
+    
+    # Rest of your data cleaning and processing code
+
+    # Display the cleaned data
+    st.dataframe(df1)
+
+    # Save as Internal and External files as needed
+else:
+    st.write("Please upload the required Excel files.")
 
 # File paths
 path_to_excel1 = '/Users/3590080/OneDrive - Jabil/PR Report/Rep - Var 1.xlsx'
